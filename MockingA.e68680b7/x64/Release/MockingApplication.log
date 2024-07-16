@@ -1,0 +1,15 @@
+﻿  pch.cpp
+  AssemblyInfo.cpp
+  CppCLR_WinFormsProject.cpp
+  CustomMessageBox.cpp
+  FileForm.cpp
+  FilesForm.cpp
+  Form1.cpp
+  Home.cpp
+  MockingFiles.cpp
+C:\Users\bpetkovic\source\repos\MockingApplication\MockingFiles.cpp(58,17): warning C4129: '(': unrecognized character escape sequence
+C:\Users\bpetkovic\source\repos\MockingApplication\MockingFiles.cpp(58,17): warning C4129: ';': unrecognized character escape sequence
+  .NETFramework,Version=v4.8.AssemblyAttributes.cpp
+  Generating Code...
+  AssemblyInfo.obj : MSIL module encountered; incremental linking is disabled for MSIL; performing full link
+  MockingApplication.vcxproj -> C:\Users\bpetkovic\source\repos\MockingApplication\x64\Release\MockingApplication.exe

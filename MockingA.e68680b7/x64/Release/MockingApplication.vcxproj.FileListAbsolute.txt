@@ -1,0 +1,11 @@
+C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Release\MockingApplication.vcxproj.AssemblyReference.cache
+C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Release\MockingApplication.Form1.resources
+C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Release\MockingApplication.vcxproj.GenerateResource.cache
+C:\Users\bpetkovic\source\repos\MockingApplication\x64\Release\ReaLTaiizor.dll
+C:\Users\bpetkovic\source\repos\MockingApplication\x64\Release\ReaLTaiizor.xml
+C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Release\MockingApplication.CustomMessageBox.resources
+C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Release\MockingApplication.FileForm.resources
+C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Release\MockingApplication.FilesForm.resources
+C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Release\MockingApplication.Home.resources
+C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Release\MockingApplication.Resources.resources
+C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Release\MockingA.A39D0108.Up2Date

@@ -3,7 +3,7 @@ C:\Users\bpetkovic\source\repos\MockingApplication\x64\Debug\ReaLTaiizor.xml
 C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Debug\MockingApplication.vcxproj.AssemblyReference.cache
 C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Debug\MockingApplication.FileForm.resources
 C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Debug\MockingApplication.FilesForm.resources
-C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Debug\MockingApplication.Form1.resources
+C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Debug\MockingApplication.MainForm.resources
 C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Debug\MockingApplication.Home.resources
 C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Debug\MockingApplication.Resources.resources
 C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Debug\MockingApplication.vcxproj.GenerateResource.cache

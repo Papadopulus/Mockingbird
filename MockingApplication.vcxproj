@@ -140,7 +140,7 @@
     <ClInclude Include="FilesForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
-    <ClInclude Include="Form1.h">
+    <ClInclude Include="MainForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="Home.h">
@@ -155,7 +155,7 @@
     <ClCompile Include="CppCLR_WinFormsProject.cpp" />
     <ClCompile Include="FileForm.cpp" />
     <ClCompile Include="FilesForm.cpp" />
-    <ClCompile Include="Form1.cpp" />
+    <ClCompile Include="MainForm.cpp" />
     <ClCompile Include="Home.cpp" />
     <ClCompile Include="MockingFiles.cpp" />
     <ClCompile Include="pch.cpp">
@@ -199,8 +199,8 @@
     <EmbeddedResource Include="FilesForm.resx">
       <DependentUpon>FilesForm.h</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.h</DependentUpon>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.h</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Home.resx">
       <DependentUpon>Home.h</DependentUpon>

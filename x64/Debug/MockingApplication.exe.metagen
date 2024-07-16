@@ -1,6 +1,6 @@
   MockingApplication.FileForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.FilesForm.resources - Embedded, ContainedInManifestFile, 
-  MockingApplication.Form1.resources - Embedded, ContainedInManifestFile, 
+  MockingApplication.MainForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.Home.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.Resources.resources - Embedded, ContainedInManifestFile, 
 ImageRuntimeVersion: v4.0.30319
@@ -29,6 +29,6 @@ Class MockingApplication.FileForm: AutoLayout, AnsiClass, Class, Public, BeforeF
 Class MockingApplication.FilesForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
-Class CppCLRWinFormsProject.Form1: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+Class CppCLRWinFormsProject.MainForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName

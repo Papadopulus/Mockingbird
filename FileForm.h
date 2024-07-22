@@ -31,9 +31,5 @@ namespace MockingApplication {
 	private: 
 		System::Void fileForm_Load(System::Object^ sender, System::EventArgs^ e);
 		System::Void mockSingleFile_btn_Click(System::Object^ sender, System::EventArgs^ e);
-		// A function that casts String^ to std::string
-		static std::string toStandardString(System::String^ string);
-		//Saves the mocked functions to a new file.
-		void SaveMockedFile(const std::string& mockedFilePath, const std::string& a_originalFilePath, const std::vector<std::string>& a_mockFunctions);
 };
 }

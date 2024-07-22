@@ -134,6 +134,7 @@
     <ResourceCompile Include="app.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CommonFunctions.h" />
     <ClInclude Include="FileForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
@@ -147,17 +148,22 @@
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="MockingFiles.h" />
+    <ClInclude Include="OverlayCheckBoxForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="CommonFunctions.cpp" />
     <ClCompile Include="CppCLR_WinFormsProject.cpp" />
     <ClCompile Include="FileForm.cpp" />
     <ClCompile Include="FilesForm.cpp" />
     <ClCompile Include="MainForm.cpp" />
     <ClCompile Include="Home.cpp" />
     <ClCompile Include="MockingFiles.cpp" />
+    <ClCompile Include="OverlayCheckBoxForm.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -204,6 +210,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Home.resx">
       <DependentUpon>Home.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OverlayCheckBoxForm.resx">
+      <DependentUpon>OverlayCheckBoxForm.h</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources.resx" />
   </ItemGroup>

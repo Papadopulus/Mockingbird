@@ -2,6 +2,7 @@
   MockingApplication.FilesForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.MainForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.Home.resources - Embedded, ContainedInManifestFile, 
+  MockingApplication.OverlayCheckBoxForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.Resources.resources - Embedded, ContainedInManifestFile, 
 ImageRuntimeVersion: v4.0.30319
 Assembly MockingApplication, Version=1.0.*, Culture=Invariant Language (Invariant Country): 
@@ -26,6 +27,12 @@ Class MockingApplication.Home: AutoLayout, AnsiClass, Class, Public, BeforeField
 Class MockingApplication.FileForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+Class MockingApplication.OverlayCheckBoxForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :System.Windows.Forms.Form
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    System.Windows.Forms.CheckedListBox checkedListBox : Public
+    System.Windows.Forms.Button next_btn : Public
 Class MockingApplication.FilesForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName

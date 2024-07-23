@@ -7,6 +7,7 @@
 #include "OverlayCheckBoxForm.h"
 #include "CommonFunctions.h"
 #include "MockingFiles.h"
+#include <set>
 
 namespace MockingApplication {
 
@@ -18,24 +19,15 @@ namespace MockingApplication {
 	using namespace System::Drawing;
 	using namespace System::IO;
 
-	/// <summary>
-	/// Summary for FilesForm
-	/// </summary>
 	public ref class FilesForm : public System::Windows::Forms::Form
 	{
 	public:
 		FilesForm(void)
 		{
 			InitializeComponent();
-			//
-			//TODO: Add the constructor code here
-			//
 		}
 
 	protected:
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
 		~FilesForm()
 		{
 			if (components)
@@ -44,33 +36,18 @@ namespace MockingApplication {
 			}
 		}
 	private: System::Windows::Forms::Button^ mutFolder_btn;
-	protected:
 	private: System::Windows::Forms::Label^ dsc_lbl;
 	private: System::Windows::Forms::Label^ labelTitle;
-	private: 
-	// Dodavanje deklaracije promenljive za application root path
+	// Adding declaration for application root path variable
 	private : String^ applicationRootPath;
 	protected:
 		OverlayCheckBoxForm^ overlay = gcnew OverlayCheckBoxForm();
 
-	protected:
-
-
-
-
-	protected:
-
 	private:
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
 		System::ComponentModel::Container^ components;
 
 #pragma region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
+
 		void InitializeComponent(void)
 		{
 			this->mutFolder_btn = (gcnew System::Windows::Forms::Button());
@@ -134,89 +111,119 @@ namespace MockingApplication {
 #pragma endregion
 	private: System::Void filesForm_Load(System::Object^ sender, System::EventArgs^ e)
 	{
+		// Disables the ControlBox (minimize, maximize, close) for this form
 		this->ControlBox = false;
 	}
 	private:
 		System::Void mutFolder_btn_Click(System::Object^ sender, System::EventArgs^ e)
 		{
+			// Create and open a folder browser dialog
 			FolderBrowserDialog^ folderDialog = gcnew FolderBrowserDialog();
 			if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
+				// Get the selected folder path
 				String^ selectedPath = folderDialog->SelectedPath;
 
-				//Sacuvaj parent path za proveru /test/mocks foldera
+				// Save parent path for checking /mocks folder
 				applicationRootPath = selectedPath;
 				
-				// Pozovi funkciju za procesiranje fajlova u izabranom folderu
+				// Call the function to process files in the selected folder
 				ProcessFilesInFolder(selectedPath);
 			}
 		}
 
 		void ProcessFilesInFolder(String^ folderPath)
 		{
+			// Create a vector to store all file paths
 			std::vector<std::string> allFiles;
+			// Convert managed string to standard string
 			std::string directory = std::filesystem::path(CommonFunctions::toStandardString(folderPath)).string();
 
+			// Iterate through the directory to find .c and .h files
 			for (const auto& entry : std::filesystem::directory_iterator(directory)) {
 				if (entry.path().extension() == ".c" || entry.path().extension() == ".h") {
 					allFiles.push_back(entry.path().string());
 				}
 			}
-
-			std::vector<std::string> includes;
+			// Create a set to store all #include directives
+			std::set<std::string> uniqueIncludes;
+			// Get #include directives from each file and add them to the includes vector
 			for (const auto& file : allFiles) {
 				auto fileIncludes = GetIncludesFromFile(file);
-				includes.insert(includes.end(), fileIncludes.begin(), fileIncludes.end());
+				uniqueIncludes.insert(fileIncludes.begin(), fileIncludes.end());
 			}
-
-			// Prikaži #include direktive korisniku (za sada samo ispisujemo u konzoli)
+			std::vector<std::string> includes(uniqueIncludes.begin(), uniqueIncludes.end());
+			// Display #include directives to the user (for now just print to console)
 			DisplayIncludesToUser(includes);
 		}
-		std::vector<std::string> GetIncludesFromFile(const std::string& filePath) {
+		std::vector<std::string> GetIncludesFromFile(const std::string& filePath) 
+		{
+			// Create a vector to store #include directives
 			std::vector<std::string> includes;
+			// Open the file for reading
 			std::ifstream file(filePath);
 			std::string line;
+			// Regular expression to match #include directives
 			std::regex includeRegex(R"(^\s*#include\s*["<](.*?)[">])");
 
+			// Read the file line by line
 			while (std::getline(file, line)) {
 				std::smatch match;
+				// If the line matches the #include regex, add it to the includes vector
 				if (std::regex_search(line, match, includeRegex)) {
 					includes.push_back(match[1].str());
 				}
 			}
 			return includes;
 		}
-		void DisplayIncludesToUser(std::vector<std::string> includes) {
-
-
+		void DisplayIncludesToUser(std::vector<std::string> includes) 
+		{
+			if (overlay == nullptr)
+			{
+				overlay = gcnew OverlayCheckBoxForm();
+			}
+			// Set the start position and parent for the overlay form
 			overlay->StartPosition = FormStartPosition::Manual;
 			overlay->MdiParent = this->MdiParent;
+			overlay->FormClosed += gcnew System::Windows::Forms::FormClosedEventHandler(this, &FilesForm::OverlayForm_FormClosed);
 			overlay->Dock = System::Windows::Forms::DockStyle::Fill;
 			overlay->Show();
+			// Add each #include directive to the checked list box in the overlay form
 			for (std::string include : includes) {
-				//System::String^ includeManaged = msclr::interop::marshal_as<System::String^>(include);
 				System::String^ includeManaged = gcnew System::String(include.c_str());
 				overlay->checkedListBox->Items->Add(includeManaged);
 			}
+			// Add an event handler for the next button click event
 			overlay->next_btn->Click += gcnew System::EventHandler(this, &FilesForm::next_btn_Click);
+			overlay->back_btn->Click += gcnew System::EventHandler(this, &FilesForm::back_btn_Click);
 		}
 		System::Void next_btn_Click(System::Object^ sender, System::EventArgs^ e)
 		{
+			// Create a vector to store the selected files
 			std::vector<std::string> checkedFiles;
+			// Add each checked item from the checked list box to the vector
 			for (int i = 0; i < overlay->checkedListBox->CheckedItems->Count; i++)
 			{
 				std::string item = CommonFunctions::toStandardString(overlay->checkedListBox->CheckedItems[i]->ToString());
 				checkedFiles.push_back(item);
 			}
+			MessageBox::Show("Now select the src folder that contains the checked files.");
+			// Call the function to select the source folder
 			SelectSrcFolder(checkedFiles);
+		}
+		System::Void back_btn_Click(System::Object^ sender, System::EventArgs^ e)
+		{
+			overlay->Close();
 		}
 		void SelectSrcFolder(std::vector<std::string> selectedFiles)
 		{
+			// Create and open a folder browser dialog
 			FolderBrowserDialog^ folderDialog = gcnew FolderBrowserDialog();
 			if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK)
 			{
+				// Convert managed string to standard string
 				std::string selectedPath = CommonFunctions::toStandardString(folderDialog->SelectedPath);
 
-				// Rekurzivno pretraži folder i obradi fajlove
+				// Recursively search folder and process files
 				for (const auto& file : selectedFiles)
 				{
 					ProcessSelectedFileInFolder(file, selectedPath);
@@ -226,47 +233,55 @@ namespace MockingApplication {
 		void ProcessSelectedFileInFolder(const std::string& fileName, const std::string& folderPath)
 		{
 			try {
-
+				// Get the parent path of the application root path
 				std::string applicationRootPathStd = std::filesystem::path(CommonFunctions::toStandardString(applicationRootPath)).parent_path().string();
 				MockingFiles mockingFiles;
+				// Recursively iterate through the directory to find the selected file
 				for (const auto& entry : std::filesystem::recursive_directory_iterator(folderPath))
 				{
+					// If the file name matches, process it
 					if (entry.path().filename() == fileName)
 					{
+						// Get the original folder and create a new folder path
 						std::string originalFolder = entry.path().parent_path().string();
 						std::string newFolder = applicationRootPathStd + "\\mocks/" + entry.path().parent_path().filename().string();
 
-						// Kreiraj novi folder ako ne postoji
+						// Create new folder if it doesn't exist
 						std::filesystem::create_directories(newFolder);
 
-						// Kopiraj sve .h fajlove
-						for (const auto& hFile : std::filesystem::directory_iterator(originalFolder))
+						// Copy all .h files and mock .c files
+						for (const auto& file : std::filesystem::directory_iterator(originalFolder))
 						{
-							if (hFile.path().extension() == ".h")
+							// Copy .h file
+							if (file.path().extension() == ".h")
 							{
-								std::filesystem::copy(hFile.path(), newFolder + "/" + hFile.path().filename().string());
+								std::filesystem::copy(file.path(), newFolder + "/" + file.path().filename().string());
+							}
+							// Mock .c file
+							if (file.path().extension() == ".c")
+							{
+								std::string filePathString = file.path().string();
+								std::vector<std::string> mockedFunctions = mockingFiles.ProcessFile(filePathString);
+								CommonFunctions::SaveMockedFile(newFolder + "/" + file.path().filename().string(), filePathString, mockedFunctions);
+								MessageBox::Show("File successfully saved. You are now ready to use mocked file.");
+								overlay->Close();
 							}
 						}
 
-						// Mokuj .c fajl
-						if (entry.path().extension() == ".c")
-						{
-							std::string filePathString = entry.path().string();
-							std::vector<std::string> mockedFunctions = mockingFiles.ProcessFile(filePathString);
-							CommonFunctions::SaveMockedFile(newFolder + "/" + entry.path().filename().string(), filePathString, mockedFunctions);
-							MessageBox::Show("File successfully saved. You are now ready to use mocked file.");
-						}
+						
 					}
 				}
 			}
 			catch(const std::exception & e)
 			{
+				// Show an error message if an exception occurs
 				String^ errorMessage = gcnew String(e.what());
 				MessageBox::Show("Error: " + errorMessage);
 			}
 		}
 		System::Void OverlayForm_FormClosed(System::Object^ sender, System::Windows::Forms::FormClosedEventArgs^ e)
 		{
+			// Set the overlay form to null when it is closed
 			overlay = nullptr;
 		}
 	};

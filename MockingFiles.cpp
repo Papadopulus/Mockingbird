@@ -104,6 +104,9 @@ std::vector<std::string> MockingFiles::ParseTagsFile(const std::string& a_tagsFi
 			{
 				if (!part.empty())
 				{
+					if (part == "const") 
+						continue;
+
 					returnType = part;
 					break;
 				}

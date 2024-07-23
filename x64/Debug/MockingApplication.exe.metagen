@@ -33,6 +33,7 @@ Class MockingApplication.OverlayCheckBoxForm: AutoLayout, AnsiClass, Class, Publ
   Fields:
     System.Windows.Forms.CheckedListBox checkedListBox : Public
     System.Windows.Forms.Button next_btn : Public
+    System.Windows.Forms.Button back_btn : Public
 Class MockingApplication.FilesForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName

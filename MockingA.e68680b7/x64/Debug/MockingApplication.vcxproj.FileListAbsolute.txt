@@ -9,3 +9,14 @@ C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Debug\M
 C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Debug\MockingApplication.Resources.resources
 C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Debug\MockingApplication.vcxproj.GenerateResource.cache
 C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Debug\MockingA.A39D0108.Up2Date
+C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Debug\ReaLTaiizor.dll
+C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Debug\ReaLTaiizor.xml
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.vcxproj.AssemblyReference.cache
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.FileForm.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.FilesForm.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.MainForm.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.Home.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.OverlayCheckBoxForm.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.Resources.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.vcxproj.GenerateResource.cache
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingA.A39D0108.Up2Date

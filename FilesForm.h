@@ -18,6 +18,8 @@ namespace MockingApplication {
 	using namespace System::Data;
 	using namespace System::Drawing;
 	using namespace System::IO;
+	using namespace WK::Libraries::BetterFolderBrowserNS;
+	//using namespace Microsoft::WindowsAPICodePack::Dialogs;
 
 	public ref class FilesForm : public System::Windows::Forms::Form
 	{
@@ -118,10 +120,11 @@ namespace MockingApplication {
 		System::Void mutFolder_btn_Click(System::Object^ sender, System::EventArgs^ e)
 		{
 			// Create and open a folder browser dialog
-			FolderBrowserDialog^ folderDialog = gcnew FolderBrowserDialog();
-			if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
+			BetterFolderBrowser^ folderDialog = gcnew BetterFolderBrowser();
+			folderDialog->RootFolder = Directory::GetCurrentDirectory();
+			if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK /*CommonFileDialogResult::Ok*/) {
 				// Get the selected folder path
-				String^ selectedPath = folderDialog->SelectedPath;
+				String^ selectedPath = folderDialog->SelectedFolder;
 
 				// Save parent path for checking /mocks folder
 				applicationRootPath = selectedPath;
@@ -217,7 +220,8 @@ namespace MockingApplication {
 		void SelectSrcFolder(std::vector<std::string> selectedFiles)
 		{
 			// Create and open a folder browser dialog
-			FolderBrowserDialog^ folderDialog = gcnew FolderBrowserDialog();
+			BetterFolderBrowser^ folderDialog = gcnew BetterFolderBrowser();
+			folderDialog->RootFolder = Directory::GetCurrentDirectory();
 			if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK)
 			{
 				// Convert managed string to standard string

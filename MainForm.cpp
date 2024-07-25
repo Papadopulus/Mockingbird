@@ -288,6 +288,6 @@ System::Void MainForm::pnlSideBar_MouseDown(System::Object^ sender, System::Wind
 {
 	if (e->Button == System::Windows::Forms::MouseButtons::Left) {
 		ReleaseCapture();
-		SendMessage(this->Handle, WM_NCLBUTTONDOWN, HTCAPTION, IntPtr(0));
+		SendMessage(this->Handle,WM_NCLBUTTONDOWN, HTCAPTION, IntPtr(0));
 	}
 }

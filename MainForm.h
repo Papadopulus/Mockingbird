@@ -54,7 +54,6 @@ namespace CppCLRWinFormsProject {
 		System::Void mockFiles_btn_Click(System::Object^ sender, System::EventArgs^ e);
 		void FilesForm_FormClosed(System::Object^ sender, System::Windows::Forms::FormClosedEventArgs^ e);
 		System::Void pnlSideBar_MouseDown(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e);
-
 		[DllImport("user32.dll")]
 			static bool ReleaseCapture();
 		[DllImport("user32.dll")]

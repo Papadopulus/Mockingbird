@@ -7,6 +7,7 @@
 #include "OverlayCheckBoxForm.h"
 #include "CommonFunctions.h"
 #include "MockingFiles.h"
+#include "AdvancedSettingsForm.h"
 #include <set>
 
 namespace MockingApplication {
@@ -19,7 +20,7 @@ namespace MockingApplication {
 	using namespace System::Drawing;
 	using namespace System::IO;
 	using namespace WK::Libraries::BetterFolderBrowserNS;
-	//using namespace Microsoft::WindowsAPICodePack::Dialogs;
+	using namespace System::Collections::Generic;
 
 	public ref class FilesForm : public System::Windows::Forms::Form
 	{
@@ -27,6 +28,9 @@ namespace MockingApplication {
 		FilesForm(void)
 		{
 			InitializeComponent();
+			this->slideTimer = gcnew Timer();
+			this->slideTimer->Interval = 10; // Set interval to 10 ms
+			this->slideTimer->Tick += gcnew EventHandler(this, &FilesForm::slideTimer_Tick);
 		}
 
 	protected:
@@ -37,14 +41,18 @@ namespace MockingApplication {
 				delete components;
 			}
 		}
+	private: List<System::String^>^ includes;
+	private: String^ lastUsedDirectory;;
 	private: System::Windows::Forms::Button^ mutFolder_btn;
 	private: System::Windows::Forms::Label^ dsc_lbl;
 	private: System::Windows::Forms::Label^ labelTitle;
+	private: Timer^ slideTimer;
 	// Adding declaration for application root path variable
 	private : String^ applicationRootPath;
+	private: int targetX; // Target X position for sliding form
 	protected:
-		OverlayCheckBoxForm^ overlay = gcnew OverlayCheckBoxForm();
-
+		OverlayCheckBoxForm^ overlay;
+		AdvancedSettingsForm^ advancedForm;
 	private:
 		System::ComponentModel::Container^ components;
 
@@ -121,14 +129,22 @@ namespace MockingApplication {
 		{
 			// Create and open a folder browser dialog
 			BetterFolderBrowser^ folderDialog = gcnew BetterFolderBrowser();
-			folderDialog->RootFolder = Directory::GetCurrentDirectory();
+			if (applicationRootPath != nullptr)
+			{
+				folderDialog->RootFolder = applicationRootPath;
+			}
+			else
+			{
+				folderDialog->RootFolder = Directory::GetCurrentDirectory();
+			}
 			if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK /*CommonFileDialogResult::Ok*/) {
+				
+
 				// Get the selected folder path
 				String^ selectedPath = folderDialog->SelectedFolder;
 
 				// Save parent path for checking /mocks folder
 				applicationRootPath = selectedPath;
-				
 				// Call the function to process files in the selected folder
 				ProcessFilesInFolder(selectedPath);
 			}
@@ -154,9 +170,16 @@ namespace MockingApplication {
 				auto fileIncludes = GetIncludesFromFile(file);
 				uniqueIncludes.insert(fileIncludes.begin(), fileIncludes.end());
 			}
-			std::vector<std::string> includes(uniqueIncludes.begin(), uniqueIncludes.end());
+			// Inicijalizacija managed liste
+			this->includes = gcnew System::Collections::Generic::List<System::String^>();
+
+			// Iteriranje kroz std::vector i dodavanje elemenata u managed listu
+			for (const auto& include : uniqueIncludes)
+			{
+				this->includes->Add(gcnew System::String(include.c_str()));
+			}
 			// Display #include directives to the user (for now just print to console)
-			DisplayIncludesToUser(includes);
+			DisplayIncludesToUser();
 		}
 		std::vector<std::string> GetIncludesFromFile(const std::string& filePath) 
 		{
@@ -178,27 +201,81 @@ namespace MockingApplication {
 			}
 			return includes;
 		}
-		void DisplayIncludesToUser(std::vector<std::string> includes) 
+		void DisplayIncludesToUser() 
 		{
 			if (overlay == nullptr)
 			{
 				overlay = gcnew OverlayCheckBoxForm();
+				// Set the start position and parent for the overlay form
+				overlay->StartPosition = FormStartPosition::Manual;
+				overlay->MdiParent = this->MdiParent;
+				overlay->FormClosed += gcnew System::Windows::Forms::FormClosedEventHandler(this, &FilesForm::OverlayForm_FormClosed);
+				// Add an event handler for the buttons click event
+				overlay->next_btn->Click += gcnew System::EventHandler(this, &FilesForm::next_btn_Click);
+				overlay->back_btn->Click += gcnew System::EventHandler(this, &FilesForm::back_btn_Click);
+				overlay->advanced_btn->Click += gcnew System::EventHandler(this, &FilesForm::advanced_btn_Click);
+				overlay->Dock = System::Windows::Forms::DockStyle::Fill;
+				overlay->Show();
 			}
-			// Set the start position and parent for the overlay form
-			overlay->StartPosition = FormStartPosition::Manual;
-			overlay->MdiParent = this->MdiParent;
-			overlay->FormClosed += gcnew System::Windows::Forms::FormClosedEventHandler(this, &FilesForm::OverlayForm_FormClosed);
-			overlay->Dock = System::Windows::Forms::DockStyle::Fill;
-			overlay->Show();
+			else 
+			{
+				overlay->Activate();
+			}
+
+			// Read excluded includes from file
+			std::set<std::string> excludedIncludes;
+			std::ifstream file("excluded_includes.txt");
+			std::string line;
+			while (std::getline(file, line)) {
+				excludedIncludes.insert(line);
+			}
+			file.close();
+
+			overlay->checkedListBox->Items->Clear();
 			// Add each #include directive to the checked list box in the overlay form
-			for (std::string include : includes) {
-				System::String^ includeManaged = gcnew System::String(include.c_str());
-				overlay->checkedListBox->Items->Add(includeManaged);
+			for each(String^ include in this->includes) {
+				if (excludedIncludes.find(CommonFunctions::toStandardString(include)) == excludedIncludes.end()) {
+					
+					overlay->checkedListBox->Items->Add(include);
+				}
 			}
-			// Add an event handler for the next button click event
-			overlay->next_btn->Click += gcnew System::EventHandler(this, &FilesForm::next_btn_Click);
-			overlay->back_btn->Click += gcnew System::EventHandler(this, &FilesForm::back_btn_Click);
+			
 		}
+		System::Void advanced_btn_Click(System::Object^ sender, System::EventArgs^ e)
+		{
+			if (advancedForm == nullptr) {
+				advancedForm = gcnew AdvancedSettingsForm();
+				advancedForm->FormBorderStyle = System::Windows::Forms::FormBorderStyle::None;
+				advancedForm->StartPosition = FormStartPosition::Manual;
+				advancedForm->Location = Point(this->MdiParent->Right- advancedForm->Width, this->MdiParent->Top);
+				targetX = this->MdiParent->Right;
+				advancedForm->FormClosed += gcnew System::Windows::Forms::FormClosedEventHandler(this, &FilesForm::AdvancedSettingsForm_FormClosed);
+				advancedForm->apply_btn->Click += gcnew System::EventHandler(this, &FilesForm::apply_btn_Click);
+				advancedForm->Show();
+				slideTimer->Start();
+			}
+			else {
+				advancedForm->Activate();
+			}
+		}
+		System::Void AdvancedSettingsForm_FormClosed(System::Object^ sender, System::Windows::Forms::FormClosedEventArgs^ e)
+		{
+			// Set the overlay form to null when it is closed
+			advancedForm = nullptr;
+		}
+		System::Void apply_btn_Click(System::Object^ sender, System::EventArgs^ e)
+		{
+			// Save items to a file or settings
+			// Here we can save to a file or to a Settings variable
+			std::ofstream file("excluded_includes.txt");
+			for (int i = 0; i < advancedForm->listBox->Items->Count; i++) {
+				file << CommonFunctions::toStandardString(advancedForm->listBox->Items[i]->ToString()) << std::endl;
+			}
+			file.close();
+			advancedForm->Close();
+			DisplayIncludesToUser();
+		}
+
 		System::Void next_btn_Click(System::Object^ sender, System::EventArgs^ e)
 		{
 			// Create a vector to store the selected files
@@ -211,22 +288,31 @@ namespace MockingApplication {
 			}
 			MessageBox::Show("Now select the src folder that contains the checked files.");
 			// Call the function to select the source folder
+			advancedForm->Close();
 			SelectSrcFolder(checkedFiles);
 		}
 		System::Void back_btn_Click(System::Object^ sender, System::EventArgs^ e)
 		{
+			advancedForm->Close();
 			overlay->Close();
 		}
 		void SelectSrcFolder(std::vector<std::string> selectedFiles)
 		{
 			// Create and open a folder browser dialog
 			BetterFolderBrowser^ folderDialog = gcnew BetterFolderBrowser();
-			folderDialog->RootFolder = Directory::GetCurrentDirectory();
+			if (lastUsedDirectory != nullptr)
+			{
+				folderDialog->RootFolder = lastUsedDirectory;
+			}
+			else
+			{
+				folderDialog->RootFolder = Directory::GetCurrentDirectory();
+			}		
 			if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK)
 			{
 				// Convert managed string to standard string
 				std::string selectedPath = CommonFunctions::toStandardString(folderDialog->SelectedPath);
-
+				lastUsedDirectory = folderDialog->SelectedPath;
 				// Recursively search folder and process files
 				for (const auto& file : selectedFiles)
 				{
@@ -287,6 +373,17 @@ namespace MockingApplication {
 		{
 			// Set the overlay form to null when it is closed
 			overlay = nullptr;
+		}
+		void slideTimer_Tick(System::Object^ sender, System::EventArgs^ e)
+		{
+			if (advancedForm->Location.X < targetX)
+			{
+				advancedForm->Location = Point(advancedForm->Location.X + 20, advancedForm->Location.Y);
+			}
+			else
+			{
+				slideTimer->Stop();
+			}
 		}
 	};
 }

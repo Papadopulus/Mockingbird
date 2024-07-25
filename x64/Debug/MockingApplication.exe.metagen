@@ -1,3 +1,4 @@
+  MockingApplication.AdvancedSettingsForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.FileForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.FilesForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.MainForm.resources - Embedded, ContainedInManifestFile, 
@@ -25,6 +26,12 @@ Assembly System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c5619
 	hash=None, flags=None
 Assembly System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
 	hash=None, flags=None
+Class MockingApplication.AdvancedSettingsForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :System.Windows.Forms.Form
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    System.Windows.Forms.ListBox listBox : Public
+    System.Windows.Forms.Button apply_btn : Public
 Class MockingApplication.Home: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
@@ -38,6 +45,7 @@ Class MockingApplication.OverlayCheckBoxForm: AutoLayout, AnsiClass, Class, Publ
     System.Windows.Forms.CheckedListBox checkedListBox : Public
     System.Windows.Forms.Button next_btn : Public
     System.Windows.Forms.Button back_btn : Public
+    System.Windows.Forms.Button advanced_btn : Public
 Class MockingApplication.FilesForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName

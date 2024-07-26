@@ -177,6 +177,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico" />
+    <Image Include="back.png" />
     <Image Include="bird.png">
       <DeploymentContent>false</DeploymentContent>
     </Image>

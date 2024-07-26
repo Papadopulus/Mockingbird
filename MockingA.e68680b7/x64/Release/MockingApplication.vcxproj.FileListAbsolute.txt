@@ -9,3 +9,17 @@ C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Release
 C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Release\MockingApplication.Home.resources
 C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Release\MockingApplication.Resources.resources
 C:\Users\bpetkovic\source\repos\MockingApplication\MockingA.e68680b7\x64\Release\MockingA.A39D0108.Up2Date
+C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Release\BetterFolderBrowser.dll
+C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Release\ReaLTaiizor.dll
+C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Release\BetterFolderBrowser.xml
+C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Release\ReaLTaiizor.xml
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.vcxproj.AssemblyReference.cache
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.AdvancedSettingsForm.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.FileForm.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.FilesForm.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.MainForm.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.Home.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.OverlayCheckBoxForm.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.Resources.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.vcxproj.GenerateResource.cache
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingA.A39D0108.Up2Date

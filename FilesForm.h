@@ -28,9 +28,13 @@ namespace MockingApplication {
 		FilesForm(void)
 		{
 			InitializeComponent();
+			
 			this->slideTimer = gcnew Timer();
+			this->slideTimerClose = gcnew Timer();
 			this->slideTimer->Interval = 10; // Set interval to 10 ms
+			this->slideTimerClose->Interval = 10; // Set interval to 10 ms
 			this->slideTimer->Tick += gcnew EventHandler(this, &FilesForm::slideTimer_Tick);
+			this->slideTimerClose->Tick += gcnew EventHandler(this, &FilesForm::picture_btn_Click);
 		}
 
 	protected:
@@ -47,6 +51,7 @@ namespace MockingApplication {
 	private: System::Windows::Forms::Label^ dsc_lbl;
 	private: System::Windows::Forms::Label^ labelTitle;
 	private: Timer^ slideTimer;
+	private: Timer^ slideTimerClose;
 	// Adding declaration for application root path variable
 	private : String^ applicationRootPath;
 	private: int targetX; // Target X position for sliding form
@@ -213,6 +218,8 @@ namespace MockingApplication {
 				// Add an event handler for the buttons click event
 				overlay->next_btn->Click += gcnew System::EventHandler(this, &FilesForm::next_btn_Click);
 				overlay->back_btn->Click += gcnew System::EventHandler(this, &FilesForm::back_btn_Click);
+				overlay->initial_btn->Click += gcnew System::EventHandler(this, &FilesForm::initial_btn_Click);
+				overlay->checkAllUncheckAll_btn->Click += gcnew System::EventHandler(this, &FilesForm::checkAllUncheckAll_btn_Click);
 				overlay->advanced_btn->Click += gcnew System::EventHandler(this, &FilesForm::advanced_btn_Click);
 				overlay->Dock = System::Windows::Forms::DockStyle::Fill;
 				overlay->Show();
@@ -239,7 +246,7 @@ namespace MockingApplication {
 					overlay->checkedListBox->Items->Add(include);
 				}
 			}
-			
+			uncheckFiles();
 		}
 		System::Void advanced_btn_Click(System::Object^ sender, System::EventArgs^ e)
 		{
@@ -248,15 +255,36 @@ namespace MockingApplication {
 				advancedForm->FormBorderStyle = System::Windows::Forms::FormBorderStyle::None;
 				advancedForm->StartPosition = FormStartPosition::Manual;
 				advancedForm->Location = Point(this->MdiParent->Right- advancedForm->Width, this->MdiParent->Top);
-				targetX = this->MdiParent->Right;
+				targetX = this->MdiParent->Right - 2;
 				advancedForm->FormClosed += gcnew System::Windows::Forms::FormClosedEventHandler(this, &FilesForm::AdvancedSettingsForm_FormClosed);
 				advancedForm->apply_btn->Click += gcnew System::EventHandler(this, &FilesForm::apply_btn_Click);
+				advancedForm->pictureBox1->Click += gcnew System::EventHandler(this, &FilesForm::picture_btn_Click);
+				this->MdiParent->TopMost=true;
+				this->MdiParent->LocationChanged += gcnew System::EventHandler(this, &FilesForm::MainForm_LocationChanged);
 				advancedForm->Show();
 				slideTimer->Start();
 			}
 			else {
 				advancedForm->Activate();
 			}
+			this->MdiParent->TopMost = false;
+		}
+		System::Void picture_btn_Click(System::Object^ sender, System::EventArgs^ e)
+		{
+			slideTimerClose->Start();
+			this->MdiParent->TopMost = true;
+			if (advancedForm->Location.X > (targetX-advancedForm->Width))
+			{
+				advancedForm->Location = Point(advancedForm->Location.X - 20, advancedForm->Location.Y);
+			}
+			else
+			{
+				advancedForm->Close();
+				this->MdiParent->TopMost = false;
+				slideTimerClose->Stop();
+			}
+			
+
 		}
 		System::Void AdvancedSettingsForm_FormClosed(System::Object^ sender, System::Windows::Forms::FormClosedEventArgs^ e)
 		{
@@ -272,7 +300,6 @@ namespace MockingApplication {
 				file << CommonFunctions::toStandardString(advancedForm->listBox->Items[i]->ToString()) << std::endl;
 			}
 			file.close();
-			advancedForm->Close();
 			DisplayIncludesToUser();
 		}
 
@@ -288,13 +315,44 @@ namespace MockingApplication {
 			}
 			MessageBox::Show("Now select the src folder that contains the checked files.");
 			// Call the function to select the source folder
-			advancedForm->Close();
+			if (advancedForm != nullptr)
+			{
+				advancedForm->Close();
+			}
 			SelectSrcFolder(checkedFiles);
 		}
 		System::Void back_btn_Click(System::Object^ sender, System::EventArgs^ e)
 		{
-			advancedForm->Close();
+			if (advancedForm != nullptr)
+			{
+				advancedForm->Close();
+			}
 			overlay->Close();
+		}
+		System::Void initial_btn_Click(System::Object^ sender, System::EventArgs^ e)
+		{
+			uncheckFiles();
+		}
+		System::Void checkAllUncheckAll_btn_Click(System::Object^ sender, System::EventArgs^ e)
+		{
+			if (overlay->checkAllUncheckAll_btn->Text == "Check All")
+			{
+				// Check all items
+				for (int i = 0; i < overlay->checkedListBox->Items->Count; i++)
+				{
+					overlay->checkedListBox->SetItemChecked(i, true);
+				}
+				overlay->checkAllUncheckAll_btn->Text = "Uncheck All";
+			}
+			else
+			{
+				// Uncheck all items
+				for (int i = 0; i < overlay->checkedListBox->Items->Count; i++)
+				{
+					overlay->checkedListBox->SetItemChecked(i, false);
+				}
+				overlay->checkAllUncheckAll_btn->Text = "Check All";
+			};
 		}
 		void SelectSrcFolder(std::vector<std::string> selectedFiles)
 		{
@@ -318,6 +376,12 @@ namespace MockingApplication {
 				{
 					ProcessSelectedFileInFolder(file, selectedPath);
 				}
+				if (overlay != nullptr)
+				{
+					overlay->Close();
+
+				}
+				MessageBox::Show("All files are successfully saved. You are now ready to use mocked files.");
 			}
 		}
 		void ProcessSelectedFileInFolder(const std::string& fileName, const std::string& folderPath)
@@ -345,7 +409,8 @@ namespace MockingApplication {
 							// Copy .h file
 							if (file.path().extension() == ".h")
 							{
-								std::filesystem::copy(file.path(), newFolder + "/" + file.path().filename().string());
+								std::filesystem::copy(file.path(), newFolder + "/" + file.path().filename().string(), std::filesystem::copy_options::overwrite_existing);
+
 							}
 							// Mock .c file
 							if (file.path().extension() == ".c")
@@ -353,8 +418,7 @@ namespace MockingApplication {
 								std::string filePathString = file.path().string();
 								std::vector<std::string> mockedFunctions = mockingFiles.ProcessFile(filePathString);
 								CommonFunctions::SaveMockedFile(newFolder + "/" + file.path().filename().string(), filePathString, mockedFunctions);
-								MessageBox::Show("File successfully saved. You are now ready to use mocked file.");
-								overlay->Close();
+
 							}
 						}
 
@@ -382,7 +446,61 @@ namespace MockingApplication {
 			}
 			else
 			{
+				advancedForm->Location = Point(this->MdiParent->Location.X + this->MdiParent->Width, this->MdiParent->Location.Y);
 				slideTimer->Stop();
+			}
+		}
+		System::Void MainForm_LocationChanged(System::Object ^ sender, System::EventArgs ^ e)
+		{
+			if (advancedForm != nullptr)
+			{
+				// Pomerite AdvancedForm u odnosu na novu lokaciju MainForm
+				advancedForm->Location = System::Drawing::Point(this->MdiParent->Location.X + this->MdiParent->Width, this->MdiParent->Location.Y);
+
+			}
+		}
+		void uncheckFiles()
+		{
+			try {
+				// Get the parent path of the application root path
+				std::string parentPath = std::filesystem::path(CommonFunctions::toStandardString(applicationRootPath)).parent_path().string();
+
+				// Recursively find all files in the parent folder
+				std::set<std::string> parentFolderFiles;
+				for (const auto& entry : std::filesystem::recursive_directory_iterator(parentPath))
+				{
+					// Skip .svn directories
+					if (entry.is_directory() && entry.path().filename() == ".svn")
+					{
+						continue;
+					}
+					if (entry.is_regular_file()) // Ensure it's a file and not a directory
+					{
+						parentFolderFiles.insert(entry.path().filename().string());
+					}
+				}
+
+				// Uncheck the files in the checkedListBox
+				for (int i = 0; i < overlay->checkedListBox->Items->Count; i++)
+				{
+					String^ item = overlay->checkedListBox->Items[i]->ToString();
+					std::string itemStd = CommonFunctions::toStandardString(item);
+
+					if (parentFolderFiles.find(itemStd) != parentFolderFiles.end())
+					{
+						overlay->checkedListBox->SetItemChecked(i, false); // Uncheck the item
+					}
+					else
+					{
+						overlay->checkedListBox->SetItemChecked(i, true); // Check the item
+					}
+				}
+			}
+			catch (const std::exception& e)
+			{
+				// Show an error message if an exception occurs
+				String^ errorMessage = gcnew String(e.what());
+				MessageBox::Show("Error: " + errorMessage);
 			}
 		}
 	};

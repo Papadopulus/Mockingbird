@@ -1,7 +1,10 @@
-﻿  AdvancedSettingsForm.cpp
-  CppCLR_WinFormsProject.cpp
+﻿  CppCLR_WinFormsProject.cpp
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\FilesForm.h(397,66): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   FilesForm.cpp
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\FilesForm.h(397,66): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   MainForm.cpp
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\FilesForm.h(397,66): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  ProgressForm.cpp
   Generating Code...
   AdvancedSettingsForm.obj : MSIL module encountered; incremental linking is disabled for MSIL; performing full link
   MockingApplication.vcxproj -> C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Debug\MockingApplication.exe

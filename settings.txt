@@ -1,0 +1,4 @@
+mutFolderPath=C:\Users\BogdanPetkovic\Desktop\Tests\TuningMgr\V20_00_00\src\test\unit\src\mut
+srcFolderPath=C:\Users\BogdanPetkovic\Desktop\Application_V01\01\src
+mutFolderPath=C:\Users\BogdanPetkovic\Desktop\Tests\SlaveMgr\trunk\src\test\unit\src\mut
+srcFolderPath=C:\Users\BogdanPetkovic\Desktop\Application_V01\01\src\BasisPrem

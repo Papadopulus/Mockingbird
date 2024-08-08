@@ -4,6 +4,7 @@
   MockingApplication.MainForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.Home.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.OverlayCheckBoxForm.resources - Embedded, ContainedInManifestFile, 
+  MockingApplication.ProgressForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.Resources.resources - Embedded, ContainedInManifestFile, 
 ImageRuntimeVersion: v4.0.30319
 Assembly MockingApplication, Version=1.0.*, Culture=Invariant Language (Invariant Country): 
@@ -13,6 +14,8 @@ Assembly mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934
 Assembly BetterFolderBrowser, Version=1.2.*, Culture=Invariant Language (Invariant Country): 
 	hash=None, flags=None
 Assembly ReaLTaiizor, Version=3.8.*, Culture=Invariant Language (Invariant Country): 
+	hash=None, flags=None
+Assembly System.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a: 
 	hash=None, flags=None
 Assembly System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
 	hash=None, flags=None
@@ -49,6 +52,12 @@ Class MockingApplication.OverlayCheckBoxForm: AutoLayout, AnsiClass, Class, Publ
     System.Windows.Forms.Button advanced_btn : Public
     System.Windows.Forms.Button initial_btn : Public
     System.Windows.Forms.Button checkAllUncheckAll_btn : Public
+Class MockingApplication.ProgressForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :System.Windows.Forms.Form
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    System.Windows.Forms.Label status_lbl : Public
+    ReaLTaiizor.Controls.MetroProgressBar metroProgressBar1 : Public
 Class MockingApplication.FilesForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName

@@ -9,6 +9,7 @@
 #include "MockingFiles.h"
 #include "AdvancedSettingsForm.h"
 #include <set>
+#include "ProgressForm.h"
 
 namespace MockingApplication {
 
@@ -46,7 +47,6 @@ namespace MockingApplication {
 			}
 		}
 	private: List<System::String^>^ includes;
-	private: String^ lastUsedDirectory;;
 	private: System::Windows::Forms::Button^ mutFolder_btn;
 	private: System::Windows::Forms::Label^ dsc_lbl;
 	private: System::Windows::Forms::Label^ labelTitle;
@@ -58,6 +58,7 @@ namespace MockingApplication {
 	protected:
 		OverlayCheckBoxForm^ overlay;
 		AdvancedSettingsForm^ advancedForm;
+		ProgressForm^ progressForm;
 	private:
 		System::ComponentModel::Container^ components;
 
@@ -134,14 +135,8 @@ namespace MockingApplication {
 		{
 			// Create and open a folder browser dialog
 			BetterFolderBrowser^ folderDialog = gcnew BetterFolderBrowser();
-			if (applicationRootPath != nullptr)
-			{
-				folderDialog->RootFolder = applicationRootPath;
-			}
-			else
-			{
-				folderDialog->RootFolder = Directory::GetCurrentDirectory();
-			}
+			String^ lastMutPath = LoadLastUsedPath("mut");
+			folderDialog->RootFolder = (lastMutPath != nullptr) ? lastMutPath : Directory::GetCurrentDirectory();
 			if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK /*CommonFileDialogResult::Ok*/) {
 				
 
@@ -150,6 +145,8 @@ namespace MockingApplication {
 
 				// Save parent path for checking /mocks folder
 				applicationRootPath = selectedPath;
+
+				SaveLastUsedPath("mut", selectedPath);
 				// Call the function to process files in the selected folder
 				ProcessFilesInFolder(selectedPath);
 			}
@@ -221,6 +218,7 @@ namespace MockingApplication {
 				overlay->initial_btn->Click += gcnew System::EventHandler(this, &FilesForm::initial_btn_Click);
 				overlay->checkAllUncheckAll_btn->Click += gcnew System::EventHandler(this, &FilesForm::checkAllUncheckAll_btn_Click);
 				overlay->advanced_btn->Click += gcnew System::EventHandler(this, &FilesForm::advanced_btn_Click);
+
 				overlay->Dock = System::Windows::Forms::DockStyle::Fill;
 				overlay->Show();
 			}
@@ -246,7 +244,28 @@ namespace MockingApplication {
 					overlay->checkedListBox->Items->Add(include);
 				}
 			}
+			overlay->next_btn->Enabled = false;
+			overlay->checkedListBox->ItemCheck += gcnew System::Windows::Forms::ItemCheckEventHandler(this, &FilesForm::checkedListBox_ItemCheck);
 			uncheckFiles();
+		}
+		void checkedListBox_ItemCheck(System::Object^ sender, System::Windows::Forms::ItemCheckEventArgs^ e)
+		{
+			// Set a temporary counter to check how many items have been checked
+			int checkedCount = overlay->checkedListBox->CheckedItems->Count;
+
+			// If the item is currently being checked, increment the counter
+			if (e->NewValue == CheckState::Checked)
+			{
+				checkedCount++;
+			}
+			// If the item is checked out, decrement the counter
+			else if (e->NewValue == CheckState::Unchecked)
+			{
+				checkedCount--;
+			}
+
+			// Enable the Next button only if at least one item is checked
+			overlay->next_btn->Enabled = (checkedCount > 0);
 		}
 		System::Void advanced_btn_Click(System::Object^ sender, System::EventArgs^ e)
 		{
@@ -305,6 +324,11 @@ namespace MockingApplication {
 
 		System::Void next_btn_Click(System::Object^ sender, System::EventArgs^ e)
 		{
+			if (overlay->checkedListBox->CheckedItems->Count == 0)
+			{
+				MessageBox::Show("You must select at least one item before proceeding.");
+				return;
+			}
 			// Create a vector to store the selected files
 			std::vector<std::string> checkedFiles;
 			// Add each checked item from the checked list box to the vector
@@ -358,32 +382,51 @@ namespace MockingApplication {
 		{
 			// Create and open a folder browser dialog
 			BetterFolderBrowser^ folderDialog = gcnew BetterFolderBrowser();
-			if (lastUsedDirectory != nullptr)
-			{
-				folderDialog->RootFolder = lastUsedDirectory;
-			}
-			else
-			{
-				folderDialog->RootFolder = Directory::GetCurrentDirectory();
-			}		
+
+			String^ lastSrcPath = LoadLastUsedPath("src");
+			folderDialog->RootFolder = (lastSrcPath != nullptr) ? lastSrcPath : Directory::GetCurrentDirectory();
+
 			if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK)
 			{
+				// Show ProgressForm
+				progressForm = gcnew ProgressForm();
+				progressForm->Show();
+				progressForm->StartPosition = FormStartPosition::Manual;
+				progressForm->MdiParent = this->MdiParent;
+				progressForm->Dock = System::Windows::Forms::DockStyle::Fill;
+				progressForm->metroProgressBar1->Maximum = selectedFiles.size();
+				progressForm->metroProgressBar1->Value = 0;
+				progressForm->status_lbl->Text = "Mocking files...";
+				progressForm->Refresh();
+
+
 				// Convert managed string to standard string
 				std::string selectedPath = CommonFunctions::toStandardString(folderDialog->SelectedPath);
-				lastUsedDirectory = folderDialog->SelectedPath;
+
+				SaveLastUsedPath("src", folderDialog->SelectedPath);
+
+				int progress = 0;
 				// Recursively search folder and process files
 				for (const auto& file : selectedFiles)
 				{
 					ProcessSelectedFileInFolder(file, selectedPath);
+					progress++;
+					progressForm->metroProgressBar1->Value = progress;
+					Application::DoEvents();
 				}
 				if (overlay != nullptr)
 				{
 					overlay->Close();
 
 				}
-				MessageBox::Show("All files are successfully saved. You are now ready to use mocked files.");
+				// Close ProgressForm when mopping is complete
+				progressForm->status_lbl->Text = "Mocking finished.";
+				System::Threading::Thread::Sleep(2000);
+				progressForm->Close();
+
 			}
 		}
+
 		void ProcessSelectedFileInFolder(const std::string& fileName, const std::string& folderPath)
 		{
 			try {
@@ -502,6 +545,56 @@ namespace MockingApplication {
 				String^ errorMessage = gcnew String(e.what());
 				MessageBox::Show("Error: " + errorMessage);
 			}
+		}
+		String^ LoadLastUsedPath(String^ key)
+		{
+			String^ configFilePath = "last_used_paths.txt";
+
+			if (!File::Exists(configFilePath))
+				return nullptr;
+
+			StreamReader^ reader = gcnew StreamReader(configFilePath);
+			String^ line;
+			while ((line = reader->ReadLine()) != nullptr)
+			{
+				array<String^>^ parts = line->Split('=');
+				if (parts->Length == 2 && parts[0]->Trim() == key)
+				{
+					reader->Close();
+					return parts[1]->Trim();
+				}
+			}
+			reader->Close();
+			return nullptr;
+		}
+		void SaveLastUsedPath(String^ key, String^ path)
+		{
+			String^ configFilePath = "last_used_paths.txt";
+			Dictionary<String^, String^>^ paths = gcnew Dictionary<String^, String^>();
+
+			if (File::Exists(configFilePath))
+			{
+				StreamReader^ reader = gcnew StreamReader(configFilePath);
+				String^ line;
+				while ((line = reader->ReadLine()) != nullptr)
+				{
+					array<String^>^ parts = line->Split('=');
+					if (parts->Length == 2)
+					{
+						paths[parts[0]->Trim()] = parts[1]->Trim();
+					}
+				}
+				reader->Close();
+			}
+
+			paths[key] = path;
+
+			StreamWriter^ writer = gcnew StreamWriter(configFilePath);
+			for each (KeyValuePair<String^, String^> kvp in paths)
+			{
+				writer->WriteLine(kvp.Key + "=" + kvp.Value);
+			}
+			writer->Close();
 		}
 	};
 }

@@ -105,7 +105,7 @@ namespace MockingApplication {
 			this->advanced_btn->Font = (gcnew System::Drawing::Font(L"Segoe UI", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
 			this->advanced_btn->Location = System::Drawing::Point(764, 119);
-			this->advanced_btn->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->advanced_btn->Margin = System::Windows::Forms::Padding(4);
 			this->advanced_btn->Name = L"advanced_btn";
 			this->advanced_btn->Size = System::Drawing::Size(123, 32);
 			this->advanced_btn->TabIndex = 4;

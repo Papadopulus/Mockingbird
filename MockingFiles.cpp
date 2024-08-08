@@ -6,7 +6,43 @@
 #include <regex>
 #include <filesystem>
 #include <Windows.h>
+#include <windows.h>
+#include <string>
+#include <vector>
+#include <stdexcept>
+#include <filesystem>
 
+//std::vector<std::string> MockingFiles::ProcessFile(const std::string& a_filePath)
+//{
+//	// Getting the path to the executable file
+//	std::string exePath = GetExecutablePath();
+//	// Relative path to ctags.exe
+//	std::string ctagsPath = exePath + "\\ctags\\ctags.exe";
+//	// Get the path to the temporary folder
+//	char tempPath[MAX_PATH];
+//	GetTempPathA(MAX_PATH, tempPath);
+//	// Relative path to the output tags file
+//	std::string tagsFilePath = std::filesystem::path(tempPath).parent_path().string() + "\\tags_" + std::filesystem::path(a_filePath).stem().string();
+//	// Creating a command to run ctags.exe
+//	std::string command = ctagsPath + " --c-kinds=+px --fields=+iaS --languages=C -o \"" + tagsFilePath + "\" \"" + a_filePath + "\"";
+//
+//	// Starting the ctags process
+//	system(command.c_str());
+//	// Checking the existence of the tags file and continuing processing
+//	if (std::filesystem::exists(tagsFilePath))
+//	{
+//		std::vector<std::string> functions = ParseTagsFile(tagsFilePath);
+//		std::vector<std::string> mockFunctions = MockNonStaticFunctions(functions);
+//		// Delete the temporary tags file
+//		std::filesystem::remove(tagsFilePath);
+//		return mockFunctions;
+//
+//	}
+//	else
+//	{
+//		throw std::runtime_error("Tags file does not exist.");
+//	}
+//}
 std::vector<std::string> MockingFiles::ProcessFile(const std::string& a_filePath)
 {
 	// Getting the path to the executable file
@@ -21,8 +57,32 @@ std::vector<std::string> MockingFiles::ProcessFile(const std::string& a_filePath
 	// Creating a command to run ctags.exe
 	std::string command = ctagsPath + " --c-kinds=+px --fields=+iaS --languages=C -o \"" + tagsFilePath + "\" \"" + a_filePath + "\"";
 
+	// Setting up the process start information
+	STARTUPINFOA si;
+	PROCESS_INFORMATION pi;
+	ZeroMemory(&si, sizeof(si));
+	si.cb = sizeof(si);
+	si.dwFlags |= STARTF_USESHOWWINDOW;
+	si.wShowWindow = SW_HIDE; // Hide the window
+	ZeroMemory(&pi, sizeof(pi));
+
+	// Convert command to LPSTR
+	std::vector<char> cmd(command.begin(), command.end());
+	cmd.push_back('\0'); // Null-terminate the string
+
 	// Starting the ctags process
-	system(command.c_str());
+	if (!CreateProcessA(NULL, cmd.data(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
+	{
+		throw std::runtime_error("Failed to start ctags process.");
+	}
+
+	// Waiting for the process to complete
+	WaitForSingleObject(pi.hProcess, INFINITE);
+
+	// Closing process and thread handles
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+
 	// Checking the existence of the tags file and continuing processing
 	if (std::filesystem::exists(tagsFilePath))
 	{
@@ -31,7 +91,6 @@ std::vector<std::string> MockingFiles::ProcessFile(const std::string& a_filePath
 		// Delete the temporary tags file
 		std::filesystem::remove(tagsFilePath);
 		return mockFunctions;
-
 	}
 	else
 	{
@@ -177,40 +236,43 @@ std::vector<std::string> MockingFiles::MockNonStaticFunctions(const std::vector<
 		}
 		mockFunction << ")\n{\n";
 
-		// Each parameter is passed through and a corresponding mock function is created for it
-		for (const auto& param : paramList)
+		if (!(paramList.size() == 1 && paramList[0].find("void") != std::string::npos))
 		{
-			std::vector<std::string> paramNameParts;
-			// Allows param to be read as an input stream
-			std::istringstream iss4(param);
-			std::string paramName;
-			// The param is split into each ' ' (space character) and inserted into paramNameParts
-			while (iss4 >> paramName)
+			// Each parameter is passed through and a corresponding mock function is created for it
+			for (const auto& param : paramList)
 			{
-				paramNameParts.push_back(paramName);
-			}
-			// Takes the last element from the paramNameParts vector and assigns it to the paramName variable, which represents the name of the function
-			paramName = paramNameParts.back();
-
-			if (param.find('*') != std::string::npos)
-			{
-				// If there is a * in the name, it must be deleted before adding it to the mock function
-				if (paramName.find('*') != std::string::npos)
+				std::vector<std::string> paramNameParts;
+				// Allows param to be read as an input stream
+				std::istringstream iss4(param);
+				std::string paramName;
+				// The param is split into each ' ' (space character) and inserted into paramNameParts
+				while (iss4 >> paramName)
 				{
-					// Deleting the * from the function name to add it to the mock function
-					// Remove moves all * to the end of paramName while erase deletes all * that were moved to the end of paramName
-					paramName.erase(std::remove(paramName.begin(), paramName.end(), '*'), paramName.end());
-					mockFunction << "\tcheck_expected_ptr(" << paramName << ");\n";
+					paramNameParts.push_back(paramName);
 				}
-				// In case there is a * but not in the function name
+				// Takes the last element from the paramNameParts vector and assigns it to the paramName variable, which represents the name of the function
+				paramName = paramNameParts.back();
+
+				if (param.find('*') != std::string::npos)
+				{
+					// If there is a * in the name, it must be deleted before adding it to the mock function
+					if (paramName.find('*') != std::string::npos)
+					{
+						// Deleting the * from the function name to add it to the mock function
+						// Remove moves all * to the end of paramName while erase deletes all * that were moved to the end of paramName
+						paramName.erase(std::remove(paramName.begin(), paramName.end(), '*'), paramName.end());
+						mockFunction << "\tcheck_expected_ptr(" << paramName << ");\n";
+					}
+					// In case there is a * but not in the function name
+					else
+					{
+						mockFunction << "\tcheck_expected_ptr(" << paramName << ");\n";
+					}
+				}
 				else
 				{
-					mockFunction << "\tcheck_expected_ptr(" << paramName << ");\n";
+					mockFunction << "\tcheck_expected(" << paramName << ");\n";
 				}
-			}
-			else
-			{
-				mockFunction << "\tcheck_expected(" << paramName << ");\n";
 			}
 		}
 

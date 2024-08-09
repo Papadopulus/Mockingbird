@@ -1,17 +1,20 @@
-﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.MetaGen.targets(91,5): warning : Required file "C:\USERS\BPETKOVIC\SOURCE\REPOS\MOCKINGAPPLICATION\PACKAGES\REALTAIIZOR.3.8.0.5\LIB\NET48\REALTAIIZOR.DLL" is missing.
-  pch.cpp
+﻿  pch.cpp
   AdvancedSettingsForm.cpp
   AssemblyInfo.cpp
   CommonFunctions.cpp
   CppCLR_WinFormsProject.cpp
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\FilesForm.h(397,66): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   FileForm.cpp
   FilesForm.cpp
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\FilesForm.h(397,66): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   MainForm.cpp
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\FilesForm.h(397,66): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   Home.cpp
   MockingFiles.cpp
-C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.cpp(58,17): warning C4129: '(': unrecognized character escape sequence
-C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.cpp(58,17): warning C4129: ';': unrecognized character escape sequence
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.cpp(117,17): warning C4129: '(': unrecognized character escape sequence
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.cpp(117,17): warning C4129: ';': unrecognized character escape sequence
   OverlayCheckBoxForm.cpp
+  ProgressForm.cpp
   .NETFramework,Version=v4.8.AssemblyAttributes.cpp
   Generating Code...
   AdvancedSettingsForm.obj : MSIL module encountered; incremental linking is disabled for MSIL; performing full link

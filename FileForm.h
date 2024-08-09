@@ -18,16 +18,16 @@ namespace MockingApplication {
 	protected:
 		~FileForm();
 
-	private: System::Windows::Forms::Label^ labelTitle;
-	protected:
-	private: System::Windows::Forms::Label^ labelDescription;
-	private: System::Windows::Forms::Button^ mockSingleFile_btn;
+	private: 
+		System::Windows::Forms::Label^ labelTitle;
+		System::Windows::Forms::Label^ labelDescription;
+		System::Windows::Forms::Button^ mockSingleFile_btn;
 
-	protected:
 	private:
 		System::ComponentModel::Container ^components;
 		
 		void InitializeComponent(void);
+
 	private: 
 		System::Void fileForm_Load(System::Object^ sender, System::EventArgs^ e);
 		System::Void mockSingleFile_btn_Click(System::Object^ sender, System::EventArgs^ e);

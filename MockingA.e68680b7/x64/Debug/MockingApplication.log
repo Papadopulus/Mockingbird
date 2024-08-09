@@ -1,9 +1,11 @@
-﻿  CppCLR_WinFormsProject.cpp
-C:\Users\BogdanPetkovic\source\repos\Mockingbird\FilesForm.h(397,66): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+﻿  AdvancedSettingsForm.cpp
+  CommonFunctions.cpp
+  CppCLR_WinFormsProject.cpp
+  FileForm.cpp
   FilesForm.cpp
-C:\Users\BogdanPetkovic\source\repos\Mockingbird\FilesForm.h(397,66): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\FilesForm.cpp(349,64): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   MainForm.cpp
-C:\Users\BogdanPetkovic\source\repos\Mockingbird\FilesForm.h(397,66): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  OverlayCheckBoxForm.cpp
   ProgressForm.cpp
   Generating Code...
   AdvancedSettingsForm.obj : MSIL module encountered; incremental linking is disabled for MSIL; performing full link

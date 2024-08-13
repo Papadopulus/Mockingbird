@@ -20,10 +20,6 @@ namespace MockingApplication {
 	private: System::Windows::Forms::Label^ labelTitle;
 	private: System::Windows::Forms::Label^ labelDescription;
 	private: System::Windows::Forms::PictureBox^ pictureBox1;
-	protected:
-
-	protected:
-
 	private:
 		System::ComponentModel::Container ^components;
 

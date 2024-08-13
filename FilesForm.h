@@ -9,7 +9,9 @@
 #include "MockingFiles.h"
 #include "AdvancedSettingsForm.h"
 #include <set>
+#include <unordered_set>
 #include "ProgressForm.h"
+
 
 namespace MockingApplication {
 
@@ -23,6 +25,15 @@ namespace MockingApplication {
 	using namespace WK::Libraries::BetterFolderBrowserNS;
 	using namespace System::Collections::Generic;
 
+	ref struct FileProcessArgs
+	{
+		List<String^>^ selectedFiles;
+		String^ selectedPath;
+
+		FileProcessArgs(List<String^>^ files, String^ path)
+			: selectedFiles(files), selectedPath(path) {}
+	};
+
 	public ref class FilesForm : public System::Windows::Forms::Form
 	{
 	public:
@@ -31,27 +42,29 @@ namespace MockingApplication {
 	protected:
 		~FilesForm();
 
-	private: List<System::String^>^ includes;
-	private: System::Windows::Forms::Button^ mutFolder_btn;
-	private: System::Windows::Forms::Label^ dsc_lbl;
-	private: System::Windows::Forms::Label^ labelTitle;
-	private: Timer^ slideTimer;
-	private: Timer^ slideTimerClose;
+	private: 
+		List<System::String^>^ includes;
+		System::Windows::Forms::Button^ mutFolder_btn;
+		System::Windows::Forms::Label^ dsc_lbl;
+		System::Windows::Forms::Label^ labelTitle;
+		Timer^ slideTimer;
+		bool isOpenTimer;
 	// Adding declaration for application root path variable
-	private : String^ applicationRootPath;
-	private: int targetX; // Target X position for sliding form
+		String^ applicationRootPath;
+		int targetX; // Target X position for sliding form
+
 	protected:
 		OverlayCheckBoxForm^ overlay;
 		AdvancedSettingsForm^ advancedForm;
 		ProgressForm^ progressForm;
+	public:
+		BackgroundWorker^ bgWorker;
+
 	private:
 		System::ComponentModel::Container^ components;
 
-#pragma region Windows Form Designer generated code
-
 		void InitializeComponent(void);
 
-#pragma endregion
 	private: 
 		System::Void filesForm_Load(System::Object^ sender, System::EventArgs^ e);
 		System::Void mutFolder_btn_Click(System::Object^ sender, System::EventArgs^ e);
@@ -75,5 +88,9 @@ namespace MockingApplication {
 		void uncheckFiles();
 		String^ LoadLastUsedPath(String^ key);
 		void SaveLastUsedPath(String^ key, String^ path);
+
+		void FilesForm::bgWorker_RunWorkerCompleted(Object^ sender, RunWorkerCompletedEventArgs^ e);
+		void FilesForm::bgWorker_ProgressChanged(Object^ sender, ProgressChangedEventArgs^ e);
+		void FilesForm::bgWorker_DoWork(Object^ sender, DoWorkEventArgs^ e);
 	};
 }

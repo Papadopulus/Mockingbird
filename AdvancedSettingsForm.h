@@ -12,9 +12,6 @@ namespace MockingApplication {
 	using namespace System::Drawing;
 	using namespace System::Runtime::InteropServices;
 
-	/// <summary>
-	/// Summary for AdvancedSettingsForm
-	/// </summary>
 	public ref class AdvancedSettingsForm : public System::Windows::Forms::Form
 	{
 	public:
@@ -38,10 +35,8 @@ namespace MockingApplication {
 	private:
 		System::ComponentModel::Container ^components;
 
-#pragma region Windows Form Designer generated code
 		void InitializeComponent(void);
 
-#pragma endregion
 	private: 
 		System::Void add_btn_Click(System::Object^ sender, System::EventArgs^ e);
 		System::Void remove_btn_Click(System::Object^ sender, System::EventArgs^ e);

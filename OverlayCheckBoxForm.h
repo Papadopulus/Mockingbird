@@ -30,9 +30,6 @@ namespace MockingApplication {
 	private:
 		System::ComponentModel::Container^ components;
 
-#pragma region Windows Form Designer generated code
 		void InitializeComponent(void);
-#pragma endregion
-
 	};
 }

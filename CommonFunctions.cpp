@@ -54,5 +54,3 @@ void CommonFunctions::SaveMockedFile(const std::string& mockedFilePath, const st
 	writer.close();
 }
 
-
-

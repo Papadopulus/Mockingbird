@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "FilesForm.h"
 
+
 using namespace MockingApplication;
 
 FilesForm::FilesForm(void)
@@ -8,11 +9,17 @@ FilesForm::FilesForm(void)
 	InitializeComponent();
 
 	this->slideTimer = gcnew Timer();
-	this->slideTimerClose = gcnew Timer();
 	this->slideTimer->Interval = 10; // Set interval to 10 ms
-	this->slideTimerClose->Interval = 10; // Set interval to 10 ms
 	this->slideTimer->Tick += gcnew EventHandler(this, &FilesForm::slideTimer_Tick);
-	this->slideTimerClose->Tick += gcnew EventHandler(this, &FilesForm::picture_btn_Click);
+	this->isOpenTimer = false;
+
+	bgWorker = gcnew BackgroundWorker();
+	bgWorker->WorkerReportsProgress = true;
+	bgWorker->WorkerSupportsCancellation = true;
+
+	bgWorker->DoWork += gcnew DoWorkEventHandler(this, &FilesForm::bgWorker_DoWork);
+	bgWorker->ProgressChanged += gcnew ProgressChangedEventHandler(this, &FilesForm::bgWorker_ProgressChanged);
+	bgWorker->RunWorkerCompleted += gcnew RunWorkerCompletedEventHandler(this, &FilesForm::bgWorker_RunWorkerCompleted);
 }
 FilesForm::~FilesForm()
 {
@@ -92,7 +99,7 @@ System::Void FilesForm::mutFolder_btn_Click(System::Object^ sender, System::Even
 	BetterFolderBrowser^ folderDialog = gcnew BetterFolderBrowser();
 	String^ lastMutPath = LoadLastUsedPath("mut");
 	folderDialog->RootFolder = (lastMutPath != nullptr) ? lastMutPath : Directory::GetCurrentDirectory();
-	if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK /*CommonFileDialogResult::Ok*/) {
+	if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
 
 
 		// Get the selected folder path
@@ -120,16 +127,16 @@ void FilesForm::ProcessFilesInFolder(String^ folderPath)
 		}
 	}
 	// Create a set to store all #include directives
-	std::set<std::string> uniqueIncludes;
+	std::unordered_set<std::string> uniqueIncludes;
 	// Get #include directives from each file and add them to the includes vector
 	for (const auto& file : allFiles) {
 		auto fileIncludes = GetIncludesFromFile(file);
 		uniqueIncludes.insert(fileIncludes.begin(), fileIncludes.end());
 	}
-	// Inicijalizacija managed liste
+	// Initialization of the managed list
 	this->includes = gcnew System::Collections::Generic::List<System::String^>();
 
-	// Iteriranje kroz std::vector i dodavanje elemenata u managed listu
+	// Iterating through a std::vector and adding elements to a managed list
 	for (const auto& include : uniqueIncludes)
 	{
 		this->includes->Add(gcnew System::String(include.c_str()));
@@ -143,6 +150,9 @@ std::vector<std::string> FilesForm::GetIncludesFromFile(const std::string& fileP
 	std::vector<std::string> includes;
 	// Open the file for reading
 	std::ifstream file(filePath);
+	if (!file.is_open()) {
+		throw std::runtime_error("Could not open file: " + filePath);
+	}
 	std::string line;
 	// Regular expression to match #include directives
 	std::regex includeRegex(R"(^\s*#include\s*["<](.*?)[">])");
@@ -227,6 +237,7 @@ System::Void FilesForm::advanced_btn_Click(System::Object^ sender, System::Event
 		advancedForm = gcnew AdvancedSettingsForm();
 		advancedForm->FormBorderStyle = System::Windows::Forms::FormBorderStyle::None;
 		advancedForm->StartPosition = FormStartPosition::Manual;
+		advancedForm->ShowInTaskbar = false;
 		advancedForm->Location = Point(this->MdiParent->Right - advancedForm->Width, this->MdiParent->Top);
 		targetX = this->MdiParent->Right - 2;
 		advancedForm->FormClosed += gcnew System::Windows::Forms::FormClosedEventHandler(this, &FilesForm::AdvancedSettingsForm_FormClosed);
@@ -235,6 +246,7 @@ System::Void FilesForm::advanced_btn_Click(System::Object^ sender, System::Event
 		this->MdiParent->TopMost = true;
 		this->MdiParent->LocationChanged += gcnew System::EventHandler(this, &FilesForm::MainForm_LocationChanged);
 		advancedForm->Show();
+		isOpenTimer = false;
 		slideTimer->Start();
 	}
 	else {
@@ -244,19 +256,9 @@ System::Void FilesForm::advanced_btn_Click(System::Object^ sender, System::Event
 }
 System::Void FilesForm::picture_btn_Click(System::Object^ sender, System::EventArgs^ e)
 {
-	slideTimerClose->Start();
+	isOpenTimer = true;
 	this->MdiParent->TopMost = true;
-	if (advancedForm->Location.X > (targetX - advancedForm->Width))
-	{
-		advancedForm->Location = Point(advancedForm->Location.X - 20, advancedForm->Location.Y);
-	}
-	else
-	{
-		advancedForm->Close();
-		this->MdiParent->TopMost = false;
-		slideTimerClose->Stop();
-	}
-
+	slideTimer->Start();
 }
 System::Void FilesForm::AdvancedSettingsForm_FormClosed(System::Object^ sender, System::Windows::Forms::FormClosedEventArgs^ e)
 {
@@ -265,8 +267,7 @@ System::Void FilesForm::AdvancedSettingsForm_FormClosed(System::Object^ sender, 
 }
 System::Void FilesForm::apply_btn_Click(System::Object^ sender, System::EventArgs^ e)
 {
-	// Save items to a file or settings
-	// Here we can save to a file or to a Settings variable
+	// Save items to a settings file
 	std::ofstream file("excluded_includes.txt");
 	for (int i = 0; i < advancedForm->listBox->Items->Count; i++) {
 		file << CommonFunctions::toStandardString(advancedForm->listBox->Items[i]->ToString()) << std::endl;
@@ -357,26 +358,69 @@ void FilesForm::SelectSrcFolder(std::vector<std::string> selectedFiles)
 
 		SaveLastUsedPath("src", folderDialog->SelectedPath);
 
-		int progress = 0;
-		// Recursively search folder and process files
+		List<String^>^ managedSelectedFiles = gcnew List<String^>();
 		for (const auto& file : selectedFiles)
 		{
-			ProcessSelectedFileInFolder(file, selectedPath);
-			progress++;
-			progressForm->metroProgressBar1->Value = progress;
-			Application::DoEvents();
+			managedSelectedFiles->Add(gcnew String(file.c_str()));
 		}
-		if (overlay != nullptr)
-		{
-			overlay->Close();
+		FileProcessArgs^ args = gcnew FileProcessArgs(managedSelectedFiles, folderDialog->SelectedPath);
+		bgWorker->RunWorkerAsync(args);
 
-		}
-		// Close ProgressForm when mopping is complete
-		progressForm->status_lbl->Text = "Mocking finished.";
-		System::Threading::Thread::Sleep(2000);
-		progressForm->Close();
+		//int progress = 0;
+		//// Recursively search folder and process files
+		//for (const auto& file : selectedFiles)
+		//{
+		//	ProcessSelectedFileInFolder(file, selectedPath);
+		//	progress++;
+		//	progressForm->metroProgressBar1->Value = progress;
+		//	Application::DoEvents();
+		//}
+		//if (overlay != nullptr)
+		//{
+		//	overlay->Close();
+
+		//}
+		//// Close ProgressForm when mopping is complete
+		//progressForm->status_lbl->Text = "Mocking finished.";
+		//System::Threading::Thread::Sleep(2000);
+		//progressForm->Close();
 
 	}
+}
+void FilesForm::bgWorker_DoWork(Object^ sender, DoWorkEventArgs^ e)
+{
+	BackgroundWorker^ worker = dynamic_cast<BackgroundWorker^>(sender);
+	FileProcessArgs^ args = dynamic_cast<FileProcessArgs^>(e->Argument);
+
+	List<String^>^ selectedFiles = args->selectedFiles;
+	String^ selectedPath = args->selectedPath;
+
+	int progress = 0;
+	for each (String ^ file in selectedFiles)
+	{
+		std::string filePath = CommonFunctions::toStandardString(file);
+		std::string path = CommonFunctions::toStandardString(selectedPath);
+
+		ProcessSelectedFileInFolder(filePath, path);
+		progress++;
+		worker->ReportProgress(progress);
+	}
+}
+void FilesForm::bgWorker_ProgressChanged(Object^ sender, ProgressChangedEventArgs^ e)
+{
+	progressForm->metroProgressBar1->Value = e->ProgressPercentage;
+	progressForm->Refresh();
+}
+void FilesForm::bgWorker_RunWorkerCompleted(Object^ sender, RunWorkerCompletedEventArgs^ e)
+{
+	if (overlay != nullptr)
+	{
+		overlay->Close();
+	}
+
+	progressForm->status_lbl->Text = "Mocking finished.";
+	System::Threading::Thread::Sleep(1000);
+	progressForm->Close();
 }
 void FilesForm::ProcessSelectedFileInFolder(const std::string& fileName, const std::string& folderPath)
 {
@@ -387,6 +431,10 @@ void FilesForm::ProcessSelectedFileInFolder(const std::string& fileName, const s
 		// Recursively iterate through the directory to find the selected file
 		for (const auto& entry : std::filesystem::recursive_directory_iterator(folderPath))
 		{
+			if (entry.is_directory() && entry.path().filename() == ".svn")
+			{
+				continue; // Skip .svn directories
+			}
 			// If the file name matches, process it
 			if (entry.path().filename() == fileName)
 			{
@@ -434,21 +482,40 @@ System::Void FilesForm::OverlayForm_FormClosed(System::Object^ sender, System::W
 }
 void FilesForm::slideTimer_Tick(System::Object^ sender, System::EventArgs^ e)
 {
-	if (advancedForm->Location.X < targetX)
+	if (isOpenTimer == false)
 	{
-		advancedForm->Location = Point(advancedForm->Location.X + 20, advancedForm->Location.Y);
+		if (advancedForm->Location.X < targetX)
+		{
+			advancedForm->Location = Point(advancedForm->Location.X + 20, advancedForm->Location.Y);
+		}
+		else
+		{
+			advancedForm->Location = Point(this->MdiParent->Location.X + this->MdiParent->Width, this->MdiParent->Location.Y);
+			slideTimer->Stop();
+			isOpenTimer = true;
+		}
 	}
 	else
 	{
-		advancedForm->Location = Point(this->MdiParent->Location.X + this->MdiParent->Width, this->MdiParent->Location.Y);
-		slideTimer->Stop();
+		if (advancedForm->Location.X > (targetX - advancedForm->Width))
+		{
+			advancedForm->Location = Point(advancedForm->Location.X - 20, advancedForm->Location.Y);
+		}
+		else
+		{
+			advancedForm->Close();
+			this->MdiParent->TopMost = false;
+			slideTimer->Stop();
+			isOpenTimer = false;
+		}
 	}
+	
 }
 System::Void FilesForm::MainForm_LocationChanged(System::Object^ sender, System::EventArgs^ e)
 {
 	if (advancedForm != nullptr)
 	{
-		// Pomerite AdvancedForm u odnosu na novu lokaciju MainForm
+		// Move the AdvancedForm relative to the new MainForm location
 		advancedForm->Location = System::Drawing::Point(this->MdiParent->Location.X + this->MdiParent->Width, this->MdiParent->Location.Y);
 
 	}
@@ -460,15 +527,14 @@ void FilesForm::uncheckFiles()
 		std::string parentPath = std::filesystem::path(CommonFunctions::toStandardString(applicationRootPath)).parent_path().string();
 
 		// Recursively find all files in the parent folder
-		std::set<std::string> parentFolderFiles;
+		std::unordered_set<std::string> parentFolderFiles;
 		for (const auto& entry : std::filesystem::recursive_directory_iterator(parentPath))
 		{
-			// Skip .svn directories
 			if (entry.is_directory() && entry.path().filename() == ".svn")
 			{
-				continue;
+				continue; // Skip .svn directories
 			}
-			if (entry.is_regular_file()) // Ensure it's a file and not a directory
+			if (entry.is_regular_file())
 			{
 				parentFolderFiles.insert(entry.path().filename().string());
 			}
@@ -480,14 +546,8 @@ void FilesForm::uncheckFiles()
 			String^ item = overlay->checkedListBox->Items[i]->ToString();
 			std::string itemStd = CommonFunctions::toStandardString(item);
 
-			if (parentFolderFiles.find(itemStd) != parentFolderFiles.end())
-			{
-				overlay->checkedListBox->SetItemChecked(i, false); // Uncheck the item
-			}
-			else
-			{
-				overlay->checkedListBox->SetItemChecked(i, true); // Check the item
-			}
+			bool isChecked = (parentFolderFiles.find(itemStd) != parentFolderFiles.end());
+			overlay->checkedListBox->SetItemChecked(i, !isChecked); // Uncheck if found, otherwise check it
 		}
 	}
 	catch (const std::exception& e)

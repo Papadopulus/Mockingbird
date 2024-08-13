@@ -28,22 +28,21 @@ namespace CppCLRWinFormsProject {
 		MockingApplication::FileForm^ fileForm;
 		MockingApplication::FilesForm^ filesForm;
 
-	private: System::Windows::Forms::Panel^ pnlSideBar;
-	private: System::Windows::Forms::Label^ label1;
-	private: System::Windows::Forms::FlowLayoutPanel^ flowLayoutPanel1;
-	private: System::Windows::Forms::Button^ homeButton;
-	private: System::Windows::Forms::Panel^ homeContainer;
-	private: System::Windows::Forms::PictureBox^ pictureBox2;
-	private: System::Windows::Forms::Panel^ fileContainer;
-	private: System::Windows::Forms::Button^ mockOneFile_btn;
-	private: System::Windows::Forms::Panel^ filesContainer;
-	private: System::Windows::Forms::Button^ mockFiles_btn;
-	private: ReaLTaiizor::Controls::NightControlBox^ nightControlBox1;
+	private: 
+		System::Windows::Forms::Panel^ pnlSideBar;
+		System::Windows::Forms::Label^ label1;
+		System::Windows::Forms::FlowLayoutPanel^ flowLayoutPanel1;
+		System::Windows::Forms::Button^ homeButton;
+		System::Windows::Forms::Panel^ homeContainer;
+		System::Windows::Forms::PictureBox^ pictureBox2;
+		System::Windows::Forms::Panel^ fileContainer;
+		System::Windows::Forms::Button^ mockOneFile_btn;
+		System::Windows::Forms::Panel^ filesContainer;
+		System::Windows::Forms::Button^ mockFiles_btn;
+		ReaLTaiizor::Controls::NightControlBox^ nightControlBox1;
 
-	protected:
 	private:
 		System::ComponentModel::Container^ components;
-
 		void InitializeComponent(void);
 
 	private:
@@ -54,6 +53,7 @@ namespace CppCLRWinFormsProject {
 		System::Void mockFiles_btn_Click(System::Object^ sender, System::EventArgs^ e);
 		void FilesForm_FormClosed(System::Object^ sender, System::Windows::Forms::FormClosedEventArgs^ e);
 		System::Void pnlSideBar_MouseDown(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e);
+
 		[DllImport("user32.dll")]
 			static bool ReleaseCapture();
 		[DllImport("user32.dll")]

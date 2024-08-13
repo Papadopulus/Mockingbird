@@ -34,8 +34,8 @@ Class MockingApplication.AdvancedSettingsForm: AutoLayout, AnsiClass, Class, Pub
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
   Fields:
     System.Windows.Forms.ListBox listBox : Public
-    System.Windows.Forms.Button apply_btn : Public
     System.Windows.Forms.PictureBox pictureBox1 : Public
+    System.Windows.Forms.Button apply_btn : Public
 Class MockingApplication.Home: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
@@ -61,6 +61,8 @@ Class MockingApplication.ProgressForm: AutoLayout, AnsiClass, Class, Public, Bef
 Class MockingApplication.FilesForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    System.ComponentModel.BackgroundWorker bgWorker : Public
 Class CppCLRWinFormsProject.MainForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName

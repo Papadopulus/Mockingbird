@@ -11,6 +11,7 @@
 #include <vector>
 #include <stdexcept>
 #include <filesystem>
+#include "CommonFunctions.h"
 
 //std::vector<std::string> MockingFiles::ProcessFile(const std::string& a_filePath)
 //{
@@ -43,10 +44,10 @@
 //		throw std::runtime_error("Tags file does not exist.");
 //	}
 //}
-std::vector<std::string> MockingFiles::ProcessFile(const std::string& a_filePath)
+std::vector<std::string> MockingFiles::ProcessFile(const std::string& a_filePath, IncludeModuleSettings^ moduleSettings)
 {
 	// Getting the path to the executable file
-	std::string exePath = GetExecutablePath();
+	std::string exePath = CommonFunctions::GetExecutablePath();
 	// Relative path to ctags.exe
 	std::string ctagsPath = exePath + "\\ctags\\ctags.exe";
 	// Get the path to the temporary folder
@@ -86,8 +87,39 @@ std::vector<std::string> MockingFiles::ProcessFile(const std::string& a_filePath
 	// Checking the existence of the tags file and continuing processing
 	if (std::filesystem::exists(tagsFilePath))
 	{
+
 		std::vector<std::string> functions = ParseTagsFile(tagsFilePath);
-		std::vector<std::string> mockFunctions = MockNonStaticFunctions(functions);
+		std::vector<std::string> mockFunctions;
+		if (moduleSettings != nullptr) {
+			std::vector<std::string> mockNormalFunctions;
+			std::vector<std::string> mockFunctionsWithSettings;
+			
+
+			for (const auto& function : functions) {
+				std::string functionName = CommonFunctions::ExtractFunctionNameSimple(function);
+				bool isSelected = false;
+				for each (FunctionSettings ^ funcSettings in  moduleSettings->functions) {
+					if (CommonFunctions::toStandardString(funcSettings->functionName) == functionName) {
+						isSelected = true;
+						mockFunctionsWithSettings.push_back(GenerateMockFunction(funcSettings));
+						break;
+					}
+				}
+
+				if (!isSelected) {
+					mockNormalFunctions.push_back(function);
+				}
+			}
+			std::vector<std::string> generatedNormalFunctions = MockNonStaticFunctions(mockNormalFunctions);
+			mockFunctions.insert(mockFunctions.end(), generatedNormalFunctions.begin(), generatedNormalFunctions.end());
+
+			mockFunctions.insert(mockFunctions.end(), mockFunctionsWithSettings.begin(), mockFunctionsWithSettings.end());
+		}
+		else
+		{
+			mockFunctions = MockNonStaticFunctions(functions);
+		}
+		
 		// Delete the temporary tags file
 		std::filesystem::remove(tagsFilePath);
 		return mockFunctions;
@@ -195,7 +227,7 @@ std::vector<std::string> MockingFiles::MockNonStaticFunctions(const std::vector<
 		std::istringstream iss(function);
 		std::string part;
 
-		// It reads the function piece by piece, each time it encounters a tab. Each obtained part is added to the functionParts vector.
+		// It reads the function piece by piece, each time it encounters a tab. Each obtained part is added to the functionParts vector
 		while (std::getline(iss, part, '\t'))
 		{
 			functionParts.push_back(part);
@@ -293,20 +325,156 @@ std::vector<std::string> MockingFiles::MockNonStaticFunctions(const std::vector<
 		}
 		mockFunction << "}\n";
 
+		// Append mock function to the list
 		mockFunctions.push_back(mockFunction.str());
+
+		if (!(paramList.size() == 1 && paramList[0].find("void") != std::string::npos))
+		{
+			// Generate macro
+			std::ostringstream macro;
+			macro << "#define MOCK_" << functionName << "(";
+
+			for (size_t i = 0; i < paramList.size(); ++i)
+			{
+				std::vector<std::string> paramNameParts;
+				std::istringstream iss4(paramList[i]);
+				std::string paramName;
+				while (iss4 >> paramName)
+				{
+					paramNameParts.push_back(paramName);
+				}
+				paramName = paramNameParts.back();
+				if (paramName.find('*') != std::string::npos)
+				{
+					paramName.erase(std::remove(paramName.begin(), paramName.end(), '*'), paramName.end());
+				}
+				std::string macroParam = "a_" + paramName;
+				macro << macroParam;
+				if (i < paramList.size() - 1)
+				{
+					macro << ", ";
+				}
+			}
+
+			if (returnType != "void")
+			{
+				macro << ", a_ret";
+			}
+
+			macro << ")\\\n";
+
+			for (size_t i = 0; i < paramList.size(); ++i)
+			{
+				std::vector<std::string> paramNameParts;
+				std::istringstream iss4(paramList[i]);
+				std::string paramName;
+				while (iss4 >> paramName)
+				{
+					paramNameParts.push_back(paramName);
+				}
+				std::string actualParam = paramNameParts.back();
+				if (actualParam.find('*') != std::string::npos)
+				{
+					actualParam.erase(std::remove(actualParam.begin(), actualParam.end(), '*'), actualParam.end());
+				}
+				if (i == paramList.size() - 1 && returnType == "void")
+				{
+					macro << "\texpect_value(" << functionName << ", " << actualParam << ", a_" << actualParam << ")\\\n";
+				}
+				else
+				{
+					macro << "\texpect_value(" << functionName << ", " << actualParam << ", a_" << actualParam << ");\\\n";
+				}
+
+			}
+
+			if (returnType != "void")
+			{
+				macro << "\twill_return(" << functionName << ", a_ret)\\\n";
+			}
+			else {
+
+			}
+
+			macro << "\n";
+
+			// Append macro to the list
+			mockFunctions.push_back(macro.str());
+		}
 
 	}
 	return mockFunctions;
 }
 
-std::string MockingFiles::GetExecutablePath()
-{
-	// Buffer to hold the path
-	char buffer[MAX_PATH];
-	// Retrieve the full path of the executable
-	GetModuleFileNameA(NULL, buffer, MAX_PATH);
-	// Find the last occurrence of a backslash or forward slash
-	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
-	// Extract and return the directory path
-	return std::string(buffer).substr(0, pos);
+std::string MockingFiles::GenerateMockFunction(FunctionSettings^ funcSettings) {
+	std::string functionName = CommonFunctions::toStandardString(funcSettings->functionName);
+	std::string returnType = CommonFunctions::toStandardString(funcSettings->returnType);
+	std::ostringstream mockFunction;
+
+	// Generating the function signature.
+	mockFunction << returnType << " " << functionName << "(";
+
+	for (int i = 0; i < funcSettings->parameters->Count; i++) {
+		ParameterSettings^ param = funcSettings->parameters[i];
+		std::string paramName = CommonFunctions::CommonFunctions::toStandardString(param->paramName);
+
+		// If it is not the first parameter, add a comma.
+		if (i > 0) {
+			mockFunction << ", ";
+		}
+
+		mockFunction << paramName;
+	}
+
+	mockFunction << ")\n{\n";
+
+	// First, iterate through all parameters to identify Ptr and Length.
+	std::string ptrParam;
+	std::string lengthParam;
+	std::string ptrParamType;
+	std::string lengthParamType;
+
+	// Then, generate the function body.
+	for (int i = 0; i < funcSettings->parameters->Count; i++) 
+	{
+		ParameterSettings^ param = funcSettings->parameters[i];
+		std::string paramName = CommonFunctions::ExtractParameterName(CommonFunctions::toStandardString(param->paramName));
+		std::string paramType = CommonFunctions::ExtractParameterType(CommonFunctions::toStandardString(param->paramName)); // Extract the parameter type.
+		std::string setting = CommonFunctions::toStandardString(param->setting);
+
+		size_t starPos = paramName.find('*');
+		if (starPos != std::string::npos) {
+			paramName = paramName.substr(starPos + 1); // Removing the pointer from the beginning of the name.
+			paramType += "*";
+		}
+
+		if (setting == "None") {
+			mockFunction << "    check_expected(" << paramName << ");\n";
+		}
+
+		if (setting == "Ptr") {
+			ptrParam = paramName;
+			ptrParamType = paramType;
+		}
+		else if (setting == "Length") {
+			lengthParam = paramName;
+			lengthParamType = paramType;
+		}
+	}
+	if (!ptrParam.empty() && !lengthParam.empty()) 
+	{
+		mockFunction << "    " << ptrParamType << " cpy_ptr = mock_ptr_type(" << ptrParamType << ");\n";
+		mockFunction << "   " << lengthParamType << " cpy_length = (" << lengthParamType << ")mock();\n";
+		mockFunction << "    if(cpy_ptr != NULL && cpy_length > 0U)\n";
+		mockFunction << "    {\n";
+		mockFunction << "        memcpy(" << ptrParam << ", cpy_ptr, cpy_length);\n";
+		mockFunction << "    }\n";
+	}
+	// Adding the return value.
+	mockFunction << "    return (" << returnType << ")mock();\n";
+	mockFunction << "}\n";
+
+	return mockFunction.str();
 }
+
+

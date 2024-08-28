@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "FilesForm.h"
-
+#include <windows.h>
+#include <sstream>
+#include <iostream>
+#include <fstream>
 
 using namespace MockingApplication;
 
@@ -182,6 +185,8 @@ void FilesForm::DisplayIncludesToUser()
 		overlay->initial_btn->Click += gcnew System::EventHandler(this, &FilesForm::initial_btn_Click);
 		overlay->checkAllUncheckAll_btn->Click += gcnew System::EventHandler(this, &FilesForm::checkAllUncheckAll_btn_Click);
 		overlay->advanced_btn->Click += gcnew System::EventHandler(this, &FilesForm::advanced_btn_Click);
+		overlay->mockingSettings_btn->Click += gcnew System::EventHandler(this, &FilesForm::mockingSettings_btn_Click);
+
 
 		overlay->Dock = System::Windows::Forms::DockStyle::Fill;
 		overlay->Show();
@@ -210,6 +215,8 @@ void FilesForm::DisplayIncludesToUser()
 	}
 	overlay->next_btn->Enabled = false;
 	overlay->checkedListBox->ItemCheck += gcnew System::Windows::Forms::ItemCheckEventHandler(this, &FilesForm::checkedListBox_ItemCheck);
+	overlay->mockingSettings_btn->Enabled = false;
+	overlay->checkedListBox->SelectedIndexChanged += gcnew System::EventHandler(this, &FilesForm::checkedListBox_SelectedIndexChanged);
 	uncheckFiles();
 }
 void FilesForm::checkedListBox_ItemCheck(System::Object^ sender, System::Windows::Forms::ItemCheckEventArgs^ e)
@@ -230,6 +237,443 @@ void FilesForm::checkedListBox_ItemCheck(System::Object^ sender, System::Windows
 
 	// Enable the Next button only if at least one item is checked
 	overlay->next_btn->Enabled = (checkedCount > 0);
+}
+System::Void FilesForm::mockingSettings_btn_Click(System::Object^ sender, System::EventArgs^ e)
+{
+	if (srcPath == nullptr)
+	{
+		MessageBox::Show("Please select the src folder that contains the selected file.");
+		// Create and open a folder browser dialog
+		BetterFolderBrowser^ folderDialog = gcnew BetterFolderBrowser();
+
+		String^ lastSrcPath = LoadLastUsedPath("src");
+		folderDialog->RootFolder = (lastSrcPath != nullptr) ? lastSrcPath : Directory::GetCurrentDirectory();
+		if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+		{
+			srcPath = folderDialog->SelectedPath;
+			SaveLastUsedPath("src", folderDialog->SelectedPath);
+		}
+	}
+	if (mockingSettingsForm == nullptr)
+	{
+		mockingSettingsForm = gcnew MockingSettings();
+		mockingSettingsForm->FormBorderStyle = System::Windows::Forms::FormBorderStyle::None;
+		mockingSettingsForm->StartPosition = FormStartPosition::CenterParent;
+		mockingSettingsForm->save_btn->Click += gcnew System::EventHandler(this, &FilesForm::save_btn_Click);
+		mockingSettingsForm->apply_btn->Click += gcnew System::EventHandler(this, &FilesForm::apply_Mocking_Settings_btn_Click);
+		mockingSettingsForm->FormClosed += gcnew System::Windows::Forms::FormClosedEventHandler(this, &FilesForm::MockingSettingsForm_FormClosed);
+		mockingSettingsForm->checkedListBox->SelectedIndexChanged += gcnew System::EventHandler(this, &FilesForm::CheckListBox_SelectedIndexChanged);
+		ProcessFileForMockingSettings();
+		mockingSettingsForm->ShowDialog();
+	}
+	else
+	{
+		mockingSettingsForm->Activate();
+	}
+
+}
+System::Void FilesForm::apply_Mocking_Settings_btn_Click(System::Object^ sender, System::EventArgs^ e)
+{
+	// Working with the currently selected function in the checkedListBox
+	int selectedIndex = mockingSettingsForm->checkedListBox->SelectedIndex;
+
+	if (selectedIndex < 0) {
+		MessageBox::Show("Niste izabrali nijednu funkciju.", "Greska", MessageBoxButtons::OK, MessageBoxIcon::Error);
+		return;
+	}
+
+	// Retrieve the currently selected item
+	String^ itemString = mockingSettingsForm->checkedListBox->Items[selectedIndex]->ToString();
+
+	// Parse the string to obtain the function name and return type
+	FunctionSettings^ funcSettings = gcnew FunctionSettings();
+	std::string itemStdString = CommonFunctions::toStandardString(itemString);
+	auto tabPosition = itemStdString.find('\t');
+	if (tabPosition != std::string::npos) {
+		std::string returnType = itemStdString.substr(0, tabPosition);
+		std::string functionName = itemStdString.substr(tabPosition + 1);
+
+		funcSettings->returnType = gcnew String(returnType.c_str());
+		funcSettings->functionName = gcnew String(functionName.c_str());
+	}
+
+	// Retrieve parameter settings
+	for (int j = 0; j < mockingSettingsForm->flowLayoutPanel->Controls->Count; j += 2) {
+		Label^ lbl = dynamic_cast<Label^>(mockingSettingsForm->flowLayoutPanel->Controls[j]);
+		ComboBox^ cb = dynamic_cast<ComboBox^>(mockingSettingsForm->flowLayoutPanel->Controls[j + 1]);
+
+		if (lbl != nullptr && cb != nullptr) {
+			ParameterSettings^ paramSettings = gcnew ParameterSettings();
+			paramSettings->paramName = lbl->Text->Replace(":", "");
+			paramSettings->setting = cb->SelectedItem->ToString();
+			funcSettings->parameters->Add(paramSettings);
+		}
+	}
+
+	// Check if both "Ptr" and "Length" parameters are set
+	bool hasPtr = false;
+	bool hasLength = false;
+
+	for each (ParameterSettings ^ param in funcSettings->parameters) {
+		if (param->setting == "Ptr") {
+			hasPtr = true;
+		}
+		if (param->setting == "Length") {
+			hasLength = true;
+		}
+	}
+
+	// If either parameter is not set, display a message and stop saving
+	if (!hasPtr || !hasLength) {
+		MessageBox::Show("Morate postaviti 'Ptr' i 'Length' parametre pre nego što primenite promene.", "Greska", MessageBoxButtons::OK, MessageBoxIcon::Error);
+		return;
+	}
+
+	// Add the function to the list of saved settings
+	String^ currentIncludeName = overlay->checkedListBox->SelectedItem->ToString();
+	IncludeModuleSettings^ currentModule = nullptr;
+
+	for each (IncludeModuleSettings ^ module in includeSettings) {
+		if (module->includeName == currentIncludeName) {
+			currentModule = module;
+			break;
+		}
+	}
+
+	if (currentModule == nullptr) {
+		currentModule = gcnew IncludeModuleSettings();
+		currentModule->includeName = currentIncludeName;
+		includeSettings->Add(currentModule);
+	}
+
+	// Remove the function if it already exists in the list (to avoid duplication)
+	for (int i = 0; i < currentModule->functions->Count; i++) {
+		if (currentModule->functions[i]->functionName == funcSettings->functionName) {
+			currentModule->functions->RemoveAt(i);
+			break;
+		}
+	}
+
+	// Add the new function with the new settings
+	currentModule->functions->Add(funcSettings);
+
+	MessageBox::Show("Postavke su uspešno primenjene.", "Uspeh", MessageBoxButtons::OK, MessageBoxIcon::Information);
+}
+System::Void FilesForm::save_btn_Click(System::Object^ sender, System::EventArgs^ e)
+{
+	// Find the current module based on the selected include
+	String^ currentIncludeName = overlay->checkedListBox->SelectedItem->ToString();
+	IncludeModuleSettings^ currentModule = nullptr;
+
+	for each (IncludeModuleSettings ^ module in includeSettings)
+	{
+		if (module->includeName == currentIncludeName)
+		{
+			currentModule = module;
+			break;
+		}
+	}
+
+	if (currentModule == nullptr)
+	{
+		MessageBox::Show("Nista niste promenili", "Neuspeh", MessageBoxButtons::OK, MessageBoxIcon::Information);
+	}
+	// Create a list of functions to keep (those that are checked)
+	std::vector<std::string> checkedFunctions;
+
+	for (int i = 0; i < mockingSettingsForm->checkedListBox->Items->Count; i++)
+	{
+		if (mockingSettingsForm->checkedListBox->GetItemChecked(i))
+		{
+			std::string itemStdString = CommonFunctions::toStandardString(mockingSettingsForm->checkedListBox->Items[i]->ToString());
+			auto tabPosition = itemStdString.find('\t');
+			if (tabPosition != std::string::npos) {
+				checkedFunctions.push_back(itemStdString.substr(tabPosition + 1));
+			}
+
+		}
+	}
+	// Iterate through the functions in reverse order and remove unchecked functions
+	for (int i = currentModule->functions->Count - 1; i >= 0; i--)
+	{
+		bool isFunctionChecked = false;
+
+		for (int j = 0; i < checkedFunctions.size(); j++)
+		{
+			if (currentModule->functions[i]->functionName == gcnew String(checkedFunctions[j].c_str()))
+			{
+				isFunctionChecked = true;
+				break;
+			}
+		}
+
+		// If the function is not checked, remove it from the list
+		if (!isFunctionChecked)
+		{
+			currentModule->functions->RemoveAt(i);
+		}
+	}
+	// Close the mocking settings form
+	mockingSettingsForm->Close();
+}
+void FilesForm::ProcessFileForMockingSettings()
+{
+
+	try {
+		// Recursively iterate through the directory to find the selected file
+		for (const auto& entry : std::filesystem::recursive_directory_iterator(CommonFunctions::toStandardString(srcPath)))
+		{
+			if (entry.is_directory() && entry.path().filename() == ".svn")
+			{
+				continue; // Skip .svn directories
+			}
+			// If the file name matches, process it
+			if (entry.path().filename() == CommonFunctions::toStandardString(overlay->checkedListBox->SelectedItem->ToString()))
+			{
+
+				// Get the original folder and create a new folder path
+				std::string originalFolder = entry.path().parent_path().string();
+				for (const auto& file : std::filesystem::directory_iterator(originalFolder))
+				{
+					// Mock .c file
+					if (file.path().extension() == ".c")
+					{
+						// Getting the path to the executable file
+						std::string exePath = CommonFunctions::GetExecutablePath();
+
+						// Relative path to ctags.exe
+						std::string ctagsPath = exePath + "\\ctags\\ctags.exe";
+						// Get the path to the temporary folder
+						char tempPath[MAX_PATH];
+						GetTempPathA(MAX_PATH, tempPath);
+						// Relative path to the output tags file
+						std::string tagsFilePath = std::filesystem::path(tempPath).parent_path().string() + "\\tags_" + std::filesystem::path(entry.path().filename()).stem().string();
+						// Creating a command to run ctags.exe
+						std::string command = ctagsPath + " --c-kinds=+px --fields=+iaS --languages=C -o \"" + tagsFilePath + "\" \"" + file.path().string() + "\"";
+						// Setting up the process start information
+						STARTUPINFOA si;
+						PROCESS_INFORMATION pi;
+						ZeroMemory(&si, sizeof(si));
+						si.cb = sizeof(si);
+						si.dwFlags |= STARTF_USESHOWWINDOW;
+						si.wShowWindow = SW_HIDE; // Hide the window
+						ZeroMemory(&pi, sizeof(pi));
+
+						// Convert command to LPSTR
+						std::vector<char> cmd(command.begin(), command.end());
+						cmd.push_back('\0'); // Null-terminate the string
+
+						// Starting the ctags process
+						if (!CreateProcessA(NULL, cmd.data(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
+						{
+							throw std::runtime_error("Failed to start ctags process.");
+						}
+
+						// Waiting for the process to complete
+						WaitForSingleObject(pi.hProcess, INFINITE);
+
+						// Closing process and thread handles
+						CloseHandle(pi.hProcess);
+						CloseHandle(pi.hThread);
+						// Checking the existence of the tags file and continuing processing
+						if (std::filesystem::exists(tagsFilePath))
+						{
+							std::vector<std::string> functions = mockingFiles.ParseTagsFile(tagsFilePath);
+							functionsForMockingSettings = CommonFunctions::ConvertToManagedList(functions);
+							DisplayFunctionsForMockingSettings(functions);
+						}
+						else
+						{
+							throw std::runtime_error("Tags file does not exist.");
+						}
+					}
+				}
+
+			}
+		}
+	}
+	catch (const std::exception& e)
+	{
+		// Show an error message if an exception occurs
+		String^ errorMessage = gcnew String(e.what());
+		MessageBox::Show("Error: " + errorMessage);
+	}
+}
+void FilesForm::CheckListBox_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e)
+{
+	// First, clear previously added ComboBoxes.
+	mockingSettingsForm->flowLayoutPanel->Controls->Clear();
+	// Get the index of the selected item.
+	int selectedIndex = mockingSettingsForm->checkedListBox->SelectedIndex;
+	if (selectedIndex < 0) return;
+
+	std::vector<std::string> functions = CommonFunctions::ConvertToStdVector(functionsForMockingSettings);
+	std::string function = functions[selectedIndex];
+
+
+	std::vector<std::string> functionParts;
+	// Allows a function to be read as an input stream
+	std::istringstream iss(function);
+	std::string part;
+
+	// It reads the function piece by piece, each time it encounters a tab. Each obtained part is added to the functionParts vector
+	while (std::getline(iss, part, '\t'))
+	{
+		functionParts.push_back(part);
+	}
+	std::string returnType = functionParts[0];
+	std::vector<std::string> restParts;
+	// Allows functionParts[1](function name and parameters) to be read as an input stream
+	std::istringstream iss2(functionParts[1]);
+	// Splits functionParts[1] into function name and parameters
+	while (std::getline(iss2, part, '('))
+	{
+		restParts.push_back(part);
+	}
+	std::string parameters = restParts[1];
+
+	std::vector<std::string> paramList;
+	// Allows parameters to be read as an input stream
+	std::istringstream iss3(parameters);
+	// Splits parameters into parameters by inserting a comma-separated string into the paramList
+	while (std::getline(iss3, part, ','))
+	{
+		paramList.push_back(part);
+	}
+
+	// Find the function in the includeSettings list.
+	String^ selectedFunctionName = gcnew String(restParts[0].c_str());
+	IncludeModuleSettings^ currentModule = nullptr;
+
+	for each (IncludeModuleSettings ^ module in includeSettings)
+	{
+		if (module->includeName == overlay->checkedListBox->SelectedItem->ToString())
+		{
+			currentModule = module;
+			break;
+		}
+	}
+
+	FunctionSettings^ existingFunction = nullptr;
+
+	if (currentModule != nullptr)
+	{
+		for each (FunctionSettings ^ funcSettings in currentModule->functions)
+		{
+			if (funcSettings->functionName == selectedFunctionName)
+			{
+				existingFunction = funcSettings;
+				break;
+			}
+		}
+	}
+
+	if (!(paramList.size() == 1 && paramList[0].find("void") != std::string::npos))
+	{
+		for (int i = 0; i < paramList.size(); i++)
+		{
+			const auto& param = paramList[i];
+
+			// Create a label for the parameter.
+			Label^ lbl = gcnew Label();
+			lbl->Text = gcnew String(param.c_str()) + ":";
+			lbl->AutoSize = true;
+			lbl->Font = (gcnew System::Drawing::Font(L"Segoe UI", 10, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, static_cast<System::Byte>(0)));
+			lbl->Margin = System::Windows::Forms::Padding(0, 0, 20, 10);
+			mockingSettingsForm->flowLayoutPanel->Controls->Add(lbl);
+
+			// Create a ComboBox.
+			ComboBox^ cb = gcnew ComboBox();
+			cb->Items->Add("None");
+			cb->Items->Add("Ptr");
+			cb->Items->Add("Length");
+
+			// Check if there is a saved value for this parameter.
+			if (existingFunction != nullptr && i < existingFunction->parameters->Count)
+			{
+				String^ savedSetting = existingFunction->parameters[i]->setting;
+				cb->SelectedItem = savedSetting;
+			}
+			else
+			{
+				// Set 'None' as the default value if there is no saved value.
+				cb->SelectedIndex = 0;
+			}
+
+			cb->Margin = System::Windows::Forms::Padding(0, 0, 0, 10);
+			mockingSettingsForm->flowLayoutPanel->Controls->Add(cb);
+		}
+	}
+
+}
+void FilesForm::DisplayFunctionsForMockingSettings(std::vector<std::string> functions)
+{
+	// First, check if there are already saved functions for this include file.
+	String^ currentIncludeName = gcnew String(overlay->checkedListBox->SelectedItem->ToString());
+	IncludeModuleSettings^ currentModule = nullptr;
+
+	for each (IncludeModuleSettings ^ module in includeSettings)
+	{
+		if (module->includeName == currentIncludeName)
+		{
+			currentModule = module;
+			break;
+		}
+	}
+	System::Collections::Generic::Dictionary<System::String^, FunctionSettings^>^ savedFunctionsMap =
+		gcnew System::Collections::Generic::Dictionary<System::String^, FunctionSettings^>();
+
+	if (currentModule != nullptr)
+	{
+		for each (FunctionSettings ^ funcSettings in currentModule->functions)
+		{
+			savedFunctionsMap[funcSettings->returnType+"\t"+funcSettings->functionName] = funcSettings;
+		}
+	}
+
+	// Clear existing items to avoid duplicates.
+	mockingSettingsForm->checkedListBox->Items->Clear();
+
+	// Add functions from functionsForMockingSettings in the same order.
+	for (const auto& func : functions)
+	{
+		std::string functionName = ParseFunctionName(func);
+		if (!functionName.empty())
+		{
+			String^ managedFunctionName = gcnew String(functionName.c_str());
+
+			// Check if the function exists in the saved functions.
+			if (savedFunctionsMap->ContainsKey(managedFunctionName))
+			{
+				// Add the saved function with a checkmark.
+				FunctionSettings^ funcSettings = savedFunctionsMap[managedFunctionName];
+				String^ functionDisplay = funcSettings->returnType + "\t" + funcSettings->functionName;
+				int index = mockingSettingsForm->checkedListBox->Items->Add(functionDisplay);
+				mockingSettingsForm->checkedListBox->SetItemChecked(index, true);
+			}
+			else
+			{
+				// Add a function that is not saved.
+				String^ functionDisplay = gcnew String(functionName.c_str());
+				mockingSettingsForm->checkedListBox->Items->Add(functionDisplay);
+			}
+		}
+	}
+}
+std::string FilesForm::ParseFunctionName(const std::string& functionSignature) {
+	// Find the start of the return type after the tab.
+	auto start = functionSignature.find('\t');
+	// Find the end of the function name before the parenthesis.
+	auto end = functionSignature.find('(');
+
+	// Check if both start and end are valid.
+	if (start != std::string::npos && end != std::string::npos) {
+		// Return a substring from the start of the return type to the end of the function name.
+		return functionSignature.substr(0, end);
+	}
+
+	// If parsing is not possible, return an empty function name.
+	return "Cannot get name of function from command";
 }
 System::Void FilesForm::advanced_btn_Click(System::Object^ sender, System::EventArgs^ e)
 {
@@ -265,6 +709,11 @@ System::Void FilesForm::AdvancedSettingsForm_FormClosed(System::Object^ sender, 
 	// Set the advancedForm form to null when it is closed
 	advancedForm = nullptr;
 }
+System::Void FilesForm::MockingSettingsForm_FormClosed(System::Object^ sender, System::Windows::Forms::FormClosedEventArgs^ e)
+{
+	// Set the mockingSettingsForm form to null when it is closed
+	mockingSettingsForm = nullptr;
+}
 System::Void FilesForm::apply_btn_Click(System::Object^ sender, System::EventArgs^ e)
 {
 	// Save items to a settings file
@@ -290,7 +739,6 @@ System::Void FilesForm::next_btn_Click(System::Object^ sender, System::EventArgs
 		std::string item = CommonFunctions::toStandardString(overlay->checkedListBox->CheckedItems[i]->ToString());
 		checkedFiles.push_back(item);
 	}
-	MessageBox::Show("Now select the src folder that contains the checked files.");
 	// Call the function to select the source folder
 	if (advancedForm != nullptr)
 	{
@@ -333,59 +781,39 @@ System::Void FilesForm::checkAllUncheckAll_btn_Click(System::Object^ sender, Sys
 }
 void FilesForm::SelectSrcFolder(std::vector<std::string> selectedFiles)
 {
-	// Create and open a folder browser dialog
-	BetterFolderBrowser^ folderDialog = gcnew BetterFolderBrowser();
-
-	String^ lastSrcPath = LoadLastUsedPath("src");
-	folderDialog->RootFolder = (lastSrcPath != nullptr) ? lastSrcPath : Directory::GetCurrentDirectory();
-
-	if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+	if (srcPath == nullptr)
 	{
-		// Show ProgressForm
-		progressForm = gcnew ProgressForm();
-		progressForm->Show();
-		progressForm->StartPosition = FormStartPosition::Manual;
-		progressForm->MdiParent = this->MdiParent;
-		progressForm->Dock = System::Windows::Forms::DockStyle::Fill;
-		progressForm->metroProgressBar1->Maximum = selectedFiles.size();
-		progressForm->metroProgressBar1->Value = 0;
-		progressForm->status_lbl->Text = "Mocking files...";
-		progressForm->Refresh();
+		MessageBox::Show("Now select the src folder that contains the checked files.");
+		// Create and open a folder browser dialog
+		BetterFolderBrowser^ folderDialog = gcnew BetterFolderBrowser();
 
-
-		// Convert managed string to standard string
-		std::string selectedPath = CommonFunctions::toStandardString(folderDialog->SelectedPath);
-
-		SaveLastUsedPath("src", folderDialog->SelectedPath);
-
-		List<String^>^ managedSelectedFiles = gcnew List<String^>();
-		for (const auto& file : selectedFiles)
+		String^ lastSrcPath = LoadLastUsedPath("src");
+		folderDialog->RootFolder = (lastSrcPath != nullptr) ? lastSrcPath : Directory::GetCurrentDirectory();
+		if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK)
 		{
-			managedSelectedFiles->Add(gcnew String(file.c_str()));
+			srcPath = folderDialog->SelectedPath;
+			SaveLastUsedPath("src", folderDialog->SelectedPath);
 		}
-		FileProcessArgs^ args = gcnew FileProcessArgs(managedSelectedFiles, folderDialog->SelectedPath);
-		bgWorker->RunWorkerAsync(args);
-
-		//int progress = 0;
-		//// Recursively search folder and process files
-		//for (const auto& file : selectedFiles)
-		//{
-		//	ProcessSelectedFileInFolder(file, selectedPath);
-		//	progress++;
-		//	progressForm->metroProgressBar1->Value = progress;
-		//	Application::DoEvents();
-		//}
-		//if (overlay != nullptr)
-		//{
-		//	overlay->Close();
-
-		//}
-		//// Close ProgressForm when mopping is complete
-		//progressForm->status_lbl->Text = "Mocking finished.";
-		//System::Threading::Thread::Sleep(2000);
-		//progressForm->Close();
-
 	}
+
+	// Show ProgressForm
+	progressForm = gcnew ProgressForm();
+	progressForm->Show();
+	progressForm->StartPosition = FormStartPosition::Manual;
+	progressForm->MdiParent = this->MdiParent;
+	progressForm->Dock = System::Windows::Forms::DockStyle::Fill;
+	progressForm->metroProgressBar1->Maximum = selectedFiles.size();
+	progressForm->metroProgressBar1->Value = 0;
+	progressForm->status_lbl->Text = "Mocking files...";
+	progressForm->Refresh();
+
+	List<String^>^ managedSelectedFiles = gcnew List<String^>();
+	for (const auto& file : selectedFiles)
+	{
+		managedSelectedFiles->Add(gcnew String(file.c_str()));
+	}
+	FileProcessArgs^ args = gcnew FileProcessArgs(managedSelectedFiles, srcPath);
+	bgWorker->RunWorkerAsync(args);
 }
 void FilesForm::bgWorker_DoWork(Object^ sender, DoWorkEventArgs^ e)
 {
@@ -421,13 +849,21 @@ void FilesForm::bgWorker_RunWorkerCompleted(Object^ sender, RunWorkerCompletedEv
 	progressForm->status_lbl->Text = "Mocking finished.";
 	System::Threading::Thread::Sleep(1000);
 	progressForm->Close();
+	srcPath = nullptr;
 }
 void FilesForm::ProcessSelectedFileInFolder(const std::string& fileName, const std::string& folderPath)
 {
 	try {
 		// Get the parent path of the application root path
 		std::string applicationRootPathStd = std::filesystem::path(CommonFunctions::toStandardString(applicationRootPath)).parent_path().string();
-		MockingFiles mockingFiles;
+		// Pronadji include mod koji odgovara fajlu
+		IncludeModuleSettings^ inclSettings = nullptr;
+		for each (IncludeModuleSettings ^ settings in includeSettings) {
+			if (CommonFunctions::toStandardString(settings->includeName) == fileName) {
+				inclSettings = settings;
+				break;
+			}
+		}
 		// Recursively iterate through the directory to find the selected file
 		for (const auto& entry : std::filesystem::recursive_directory_iterator(folderPath))
 		{
@@ -458,7 +894,7 @@ void FilesForm::ProcessSelectedFileInFolder(const std::string& fileName, const s
 					if (file.path().extension() == ".c")
 					{
 						std::string filePathString = file.path().string();
-						std::vector<std::string> mockedFunctions = mockingFiles.ProcessFile(filePathString);
+						std::vector<std::string> mockedFunctions = mockingFiles.ProcessFile(filePathString, inclSettings);
 						CommonFunctions::SaveMockedFile(newFolder + "/" + file.path().filename().string(), filePathString, mockedFunctions);
 
 					}
@@ -509,7 +945,7 @@ void FilesForm::slideTimer_Tick(System::Object^ sender, System::EventArgs^ e)
 			isOpenTimer = false;
 		}
 	}
-	
+
 }
 System::Void FilesForm::MainForm_LocationChanged(System::Object^ sender, System::EventArgs^ e)
 {
@@ -606,4 +1042,8 @@ void FilesForm::SaveLastUsedPath(String^ key, String^ path)
 		writer->WriteLine(kvp.Key + "=" + kvp.Value);
 	}
 	writer->Close();
+}
+System::Void FilesForm::checkedListBox_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e)
+{
+	overlay->mockingSettings_btn->Enabled = overlay->checkedListBox->SelectedIndex != -1;
 }

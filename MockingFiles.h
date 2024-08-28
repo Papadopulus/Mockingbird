@@ -1,12 +1,12 @@
 #pragma once
 #include <string>
 #include <vector>
-
+#include "IncludeModuleSettings.h"
 /**
  * @brief The MockingFiles class is responsible for processing C source files
  *        and generating mocked C files using CMocka.
  */
-class MockingFiles {
+public ref class MockingFiles {
 public:
 
 	/**
@@ -16,8 +16,7 @@ public:
 	 * 
 	 * @param a_filePath The path to the C source file.
 	 */
-	std::vector<std::string> ProcessFile(const std::string& a_filePath);
-private:
+	std::vector<std::string> ProcessFile(const std::string& a_filePath, IncludeModuleSettings^ moduleSettings);
 	/**
 	 * @brief Parses a ctags file to extract function signatures.
 	 *
@@ -25,6 +24,8 @@ private:
 	 * @return A list of function signatures.
 	 */
 	std::vector<std::string> ParseTagsFile(const std::string& a_tagsFilePath);
+private:
+	
 
 	/**
 	 * @brief Mocks non-static functions extracted from the ctags file.
@@ -34,14 +35,15 @@ private:
 	 */
 	std::vector<std::string> MockNonStaticFunctions(const std::vector<std::string>& a_functions);
 
-
 	/**
-	 * @brief Retrieves the path of the currently running executable.
-	 * 
-	 * This function uses the WinAPI function GetModuleFileNameA to get the full path
-	 * of the executable, then extracts the directory portion of the path.
-	 * 
-	 * @return A string containing the full path to the executable.
-	 */
-	std::string GetExecutablePath();
+	 * @brief Generates a mock implementation for a given function based on its settings.
+	 *
+	 * This function takes the function settings, including its name, return type, and parameters,
+	 * and generates a mock function that can be used for testing purposes. It handles the parameters
+	 * marked as "Ptr" and "Length" and appropriately sets up the function body to mock expected behaviors.
+	 *
+	 * @param funcSettings A managed object containing settings for the function to be mocked.
+	 * @return A string representing the generated mock function.
+	*/
+	std::string GenerateMockFunction(FunctionSettings^ funcSettings);
 };

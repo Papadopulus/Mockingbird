@@ -144,6 +144,7 @@
     <ClInclude Include="FilesForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="IncludeModuleSettings.h" />
     <ClInclude Include="MainForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
@@ -151,6 +152,9 @@
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="MockingFiles.h" />
+    <ClInclude Include="MockingSettings.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
     <ClInclude Include="OverlayCheckBoxForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
@@ -170,6 +174,7 @@
     <ClCompile Include="MainForm.cpp" />
     <ClCompile Include="Home.cpp" />
     <ClCompile Include="MockingFiles.cpp" />
+    <ClCompile Include="MockingSettings.cpp" />
     <ClCompile Include="OverlayCheckBoxForm.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -226,6 +231,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Home.resx">
       <DependentUpon>Home.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MockingSettings.resx">
+      <DependentUpon>MockingSettings.h</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="OverlayCheckBoxForm.resx">
       <DependentUpon>OverlayCheckBoxForm.h</DependentUpon>

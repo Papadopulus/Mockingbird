@@ -3,6 +3,7 @@
   MockingApplication.FilesForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.MainForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.Home.resources - Embedded, ContainedInManifestFile, 
+  MockingApplication.MockingSettings.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.OverlayCheckBoxForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.ProgressForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.Resources.resources - Embedded, ContainedInManifestFile, 
@@ -39,6 +40,11 @@ Class MockingApplication.AdvancedSettingsForm: AutoLayout, AnsiClass, Class, Pub
 Class MockingApplication.Home: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+Class MockingFiles: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Methods:
+    ProcessFile(vector<std::basic_string<char\,std::char_traits<char>\,std::allocator<char> >\,std::allocator<std::basic_string<char\,std::char_traits<char>\,std::allocator<char> > > >*, basic_string<char\,std::char_traits<char>\,std::allocator<char> >* IsImplicitlyDereferenced, IncludeModuleSettings): PrivateScope, Public, HideBySig
+    ParseTagsFile(vector<std::basic_string<char\,std::char_traits<char>\,std::allocator<char> >\,std::allocator<std::basic_string<char\,std::char_traits<char>\,std::allocator<char> > > >*, basic_string<char\,std::char_traits<char>\,std::allocator<char> >* IsImplicitlyDereferenced): PrivateScope, Public, HideBySig
 Class MockingApplication.FileForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
@@ -52,12 +58,21 @@ Class MockingApplication.OverlayCheckBoxForm: AutoLayout, AnsiClass, Class, Publ
     System.Windows.Forms.Button advanced_btn : Public
     System.Windows.Forms.Button initial_btn : Public
     System.Windows.Forms.Button checkAllUncheckAll_btn : Public
+    System.Windows.Forms.Button mockingSettings_btn : Public
 Class MockingApplication.ProgressForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
   Fields:
     System.Windows.Forms.Label status_lbl : Public
     ReaLTaiizor.Controls.MetroProgressBar metroProgressBar1 : Public
+Class MockingApplication.MockingSettings: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :System.Windows.Forms.Form
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    System.Windows.Forms.CheckedListBox checkedListBox : Public
+    System.Windows.Forms.FlowLayoutPanel flowLayoutPanel : Public
+    System.Windows.Forms.Button save_btn : Public
+    System.Windows.Forms.Button apply_btn : Public
 Class MockingApplication.FilesForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName

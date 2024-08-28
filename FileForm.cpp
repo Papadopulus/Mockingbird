@@ -102,7 +102,7 @@ System::Void FileForm::mockSingleFile_btn_Click(System::Object^ sender, System::
 			MockingFiles mockingFiles;
 
 			// Passing the file path to the ProcessFile method
-			std::vector<std::string> mockedFunctions = mockingFiles.ProcessFile(filePathString);
+			std::vector<std::string> mockedFunctions = mockingFiles.ProcessFile(filePathString,nullptr);
 
 			MessageBox::Show("File successfully mocked. Now choose where you want to save the mocked file.");
 

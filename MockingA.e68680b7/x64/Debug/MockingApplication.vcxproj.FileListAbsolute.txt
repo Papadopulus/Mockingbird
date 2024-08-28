@@ -19,6 +19,7 @@ C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\Moc
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.FilesForm.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.MainForm.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.Home.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.MockingSettings.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.OverlayCheckBoxForm.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.ProgressForm.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.Resources.resources

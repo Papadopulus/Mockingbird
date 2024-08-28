@@ -1,4 +1,10 @@
-﻿  FilesForm.cpp
-C:\Users\BogdanPetkovic\source\repos\Mockingbird\FilesForm.cpp(350,64): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+﻿  MockingFiles.cpp
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(19,108): warning C4677: 'ProcessFile': signature of non-private member contains assembly private type 'IncludeModuleSettings'
+  (compiling source file 'MockingFiles.cpp')
+      C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
+      see declaration of 'IncludeModuleSettings'
+  
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.cpp(149,17): warning C4129: '(': unrecognized character escape sequence
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.cpp(149,17): warning C4129: ';': unrecognized character escape sequence
   AdvancedSettingsForm.obj : MSIL module encountered; incremental linking is disabled for MSIL; performing full link
   MockingApplication.vcxproj -> C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Debug\MockingApplication.exe

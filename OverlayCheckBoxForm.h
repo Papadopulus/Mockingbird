@@ -26,6 +26,7 @@ namespace MockingApplication {
 		System::Windows::Forms::Button^ advanced_btn;
 		System::Windows::Forms::Button^ initial_btn;
 		System::Windows::Forms::Button^ checkAllUncheckAll_btn;
+		System::Windows::Forms::Button^ mockingSettings_btn;
 
 	private:
 		System::ComponentModel::Container^ components;

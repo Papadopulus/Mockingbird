@@ -11,6 +11,8 @@
 #include <set>
 #include <unordered_set>
 #include "ProgressForm.h"
+#include "MockingSettings.h"
+#include "IncludeModuleSettings.h"
 
 
 namespace MockingApplication {
@@ -33,7 +35,6 @@ namespace MockingApplication {
 		FileProcessArgs(List<String^>^ files, String^ path)
 			: selectedFiles(files), selectedPath(path) {}
 	};
-
 	public ref class FilesForm : public System::Windows::Forms::Form
 	{
 	public:
@@ -49,14 +50,18 @@ namespace MockingApplication {
 		System::Windows::Forms::Label^ labelTitle;
 		Timer^ slideTimer;
 		bool isOpenTimer;
+		MockingFiles mockingFiles;
 	// Adding declaration for application root path variable
 		String^ applicationRootPath;
+		String^ srcPath;
 		int targetX; // Target X position for sliding form
-
+		System::Collections::Generic::List<System::String^>^ functionsForMockingSettings;
+		System::Collections::Generic::List< IncludeModuleSettings^>^ includeSettings = gcnew System::Collections::Generic::List< IncludeModuleSettings^>();
 	protected:
 		OverlayCheckBoxForm^ overlay;
 		AdvancedSettingsForm^ advancedForm;
 		ProgressForm^ progressForm;
+		MockingSettings^ mockingSettingsForm;
 	public:
 		BackgroundWorker^ bgWorker;
 
@@ -78,6 +83,8 @@ namespace MockingApplication {
 		System::Void apply_btn_Click(System::Object^ sender, System::EventArgs^ e);
 		System::Void next_btn_Click(System::Object^ sender, System::EventArgs^ e);
 		System::Void back_btn_Click(System::Object^ sender, System::EventArgs^ e);
+		System::Void save_btn_Click(System::Object^ sender, System::EventArgs^ e);
+		System::Void apply_Mocking_Settings_btn_Click(System::Object^ sender, System::EventArgs^ e);
 		System::Void initial_btn_Click(System::Object^ sender, System::EventArgs^ e);
 		System::Void checkAllUncheckAll_btn_Click(System::Object^ sender, System::EventArgs^ e);
 		void SelectSrcFolder(std::vector<std::string> selectedFiles);
@@ -88,9 +95,15 @@ namespace MockingApplication {
 		void uncheckFiles();
 		String^ LoadLastUsedPath(String^ key);
 		void SaveLastUsedPath(String^ key, String^ path);
-
 		void FilesForm::bgWorker_RunWorkerCompleted(Object^ sender, RunWorkerCompletedEventArgs^ e);
 		void FilesForm::bgWorker_ProgressChanged(Object^ sender, ProgressChangedEventArgs^ e);
 		void FilesForm::bgWorker_DoWork(Object^ sender, DoWorkEventArgs^ e);
+		System::Void checkedListBox_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e);
+		System::Void FilesForm::mockingSettings_btn_Click(System::Object^ sender, System::EventArgs^ e);
+		System::Void FilesForm::MockingSettingsForm_FormClosed(System::Object^ sender, System::Windows::Forms::FormClosedEventArgs^ e);
+		System::Void CheckListBox_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e);
+		void ProcessFileForMockingSettings();
+		void DisplayFunctionsForMockingSettings(std::vector<std::string> functions);
+		std::string ParseFunctionName(const std::string& functionSignature);
 	};
 }

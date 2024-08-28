@@ -56,6 +56,12 @@
     <ClInclude Include="ProgressForm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MockingSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IncludeModuleSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CppCLR_WinFormsProject.cpp">
@@ -92,6 +98,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ProgressForm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MockingSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

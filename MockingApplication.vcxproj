@@ -138,6 +138,9 @@
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="CommonFunctions.h" />
+    <ClInclude Include="DuplicateFilesForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
     <ClInclude Include="FileForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
@@ -158,6 +161,9 @@
     <ClInclude Include="OverlayCheckBoxForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="OverwriteForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
     <ClInclude Include="pch.h" />
     <ClInclude Include="ProgressForm.h">
       <FileType>CppForm</FileType>
@@ -169,6 +175,7 @@
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="CommonFunctions.cpp" />
     <ClCompile Include="CppCLR_WinFormsProject.cpp" />
+    <ClCompile Include="DuplicateFilesForm.cpp" />
     <ClCompile Include="FileForm.cpp" />
     <ClCompile Include="FilesForm.cpp" />
     <ClCompile Include="MainForm.cpp" />
@@ -176,6 +183,7 @@
     <ClCompile Include="MockingFiles.cpp" />
     <ClCompile Include="MockingSettings.cpp" />
     <ClCompile Include="OverlayCheckBoxForm.cpp" />
+    <ClCompile Include="OverwriteForm.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -193,6 +201,7 @@
     <Image Include="bird2.png">
       <DeploymentContent>false</DeploymentContent>
     </Image>
+    <Image Include="help.png" />
     <Image Include="home.png">
       <DeploymentContent>false</DeploymentContent>
     </Image>
@@ -220,6 +229,9 @@
     <EmbeddedResource Include="AdvancedSettingsForm.resx">
       <DependentUpon>AdvancedSettingsForm.h</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="DuplicateFilesForm.resx">
+      <DependentUpon>DuplicateFilesForm.h</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FileForm.resx">
       <DependentUpon>FileForm.h</DependentUpon>
     </EmbeddedResource>
@@ -237,6 +249,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="OverlayCheckBoxForm.resx">
       <DependentUpon>OverlayCheckBoxForm.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OverwriteForm.resx">
+      <DependentUpon>OverwriteForm.h</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ProgressForm.resx">
       <DependentUpon>ProgressForm.h</DependentUpon>

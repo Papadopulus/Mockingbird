@@ -23,7 +23,9 @@ MainForm::~MainForm()
 }
 System::Void MainForm::InitializeComponent(void)
 {
-	System::Resources::ResourceManager^ resources = (gcnew System::Resources::ResourceManager(L"MockingApplication.Resources", System::Reflection::Assembly::GetExecutingAssembly()));	this->pnlSideBar = (gcnew System::Windows::Forms::Panel());
+	System::Resources::ResourceManager^ resources = (gcnew System::Resources::ResourceManager(L"MockingApplication.Resources", System::Reflection::Assembly::GetExecutingAssembly()));
+	this->pnlSideBar = (gcnew System::Windows::Forms::Panel());
+	this->helpImg = (gcnew System::Windows::Forms::PictureBox());
 	this->nightControlBox1 = (gcnew ReaLTaiizor::Controls::NightControlBox());
 	this->pictureBox2 = (gcnew System::Windows::Forms::PictureBox());
 	this->label1 = (gcnew System::Windows::Forms::Label());
@@ -35,6 +37,7 @@ System::Void MainForm::InitializeComponent(void)
 	this->filesContainer = (gcnew System::Windows::Forms::Panel());
 	this->mockFiles_btn = (gcnew System::Windows::Forms::Button());
 	this->pnlSideBar->SuspendLayout();
+	(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->helpImg))->BeginInit();
 	(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox2))->BeginInit();
 	this->flowLayoutPanel1->SuspendLayout();
 	this->homeContainer->SuspendLayout();
@@ -48,36 +51,46 @@ System::Void MainForm::InitializeComponent(void)
 	this->pnlSideBar->Controls->Add(this->nightControlBox1);
 	this->pnlSideBar->Controls->Add(this->pictureBox2);
 	this->pnlSideBar->Controls->Add(this->label1);
+	this->pnlSideBar->Controls->Add(this->helpImg);
 	this->pnlSideBar->Dock = System::Windows::Forms::DockStyle::Top;
 	this->pnlSideBar->Location = System::Drawing::Point(0, 0);
-	this->pnlSideBar->Margin = System::Windows::Forms::Padding(4);
 	this->pnlSideBar->Name = L"pnlSideBar";
-	this->pnlSideBar->Size = System::Drawing::Size(1207, 57);
+	this->pnlSideBar->Size = System::Drawing::Size(905, 46);
 	this->pnlSideBar->TabIndex = 1;
 	this->pnlSideBar->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &MainForm::pnlSideBar_MouseDown);
 	// 
+	// helpImg
+	// 
+	this->helpImg->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"help")));
+	this->helpImg->Location = System::Drawing::Point(706, -4);
+	this->helpImg->Name = L"helpImg";
+	this->helpImg->Size = System::Drawing::Size(53, 53);
+	this->helpImg->SizeMode = System::Windows::Forms::PictureBoxSizeMode::StretchImage;
+	this->helpImg->TabIndex = 5;
+	this->helpImg->TabStop = false;
+	// 
 	// nightControlBox1
 	// 
-	this->nightControlBox1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
+	this->nightControlBox1->Anchor = System::Windows::Forms::AnchorStyles::None;
 	this->nightControlBox1->BackColor = System::Drawing::Color::Transparent;
 	this->nightControlBox1->CloseHoverColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(199)),
 		static_cast<System::Int32>(static_cast<System::Byte>(80)), static_cast<System::Int32>(static_cast<System::Byte>(80)));
 	this->nightControlBox1->CloseHoverForeColor = System::Drawing::Color::White;
 	this->nightControlBox1->Cursor = System::Windows::Forms::Cursors::Hand;
-	this->nightControlBox1->DefaultLocation = true;
+	this->nightControlBox1->DefaultLocation = false;
 	this->nightControlBox1->DisableMaximizeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(105)),
 		static_cast<System::Int32>(static_cast<System::Byte>(105)), static_cast<System::Int32>(static_cast<System::Byte>(105)));
 	this->nightControlBox1->DisableMinimizeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(105)),
 		static_cast<System::Int32>(static_cast<System::Byte>(105)), static_cast<System::Int32>(static_cast<System::Byte>(105)));
 	this->nightControlBox1->EnableCloseColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(160)),
 		static_cast<System::Int32>(static_cast<System::Byte>(160)), static_cast<System::Int32>(static_cast<System::Byte>(160)));
-	this->nightControlBox1->EnableMaximizeButton = true;
+	this->nightControlBox1->EnableMaximizeButton = false;
 	this->nightControlBox1->EnableMaximizeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(160)),
 		static_cast<System::Int32>(static_cast<System::Byte>(160)), static_cast<System::Int32>(static_cast<System::Byte>(160)));
 	this->nightControlBox1->EnableMinimizeButton = true;
 	this->nightControlBox1->EnableMinimizeColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(160)),
 		static_cast<System::Int32>(static_cast<System::Byte>(160)), static_cast<System::Int32>(static_cast<System::Byte>(160)));
-	this->nightControlBox1->Location = System::Drawing::Point(1068, 0);
+	this->nightControlBox1->Location = System::Drawing::Point(763, 7);
 	this->nightControlBox1->MaximizeHoverColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(15)),
 		static_cast<System::Int32>(static_cast<System::Byte>(255)), static_cast<System::Int32>(static_cast<System::Byte>(255)), static_cast<System::Int32>(static_cast<System::Byte>(255)));
 	this->nightControlBox1->MaximizeHoverForeColor = System::Drawing::Color::White;
@@ -91,10 +104,9 @@ System::Void MainForm::InitializeComponent(void)
 	// pictureBox2
 	// 
 	this->pictureBox2->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"mockingBirdRounded")));
-	this->pictureBox2->Location = System::Drawing::Point(19, 5);
-	this->pictureBox2->Margin = System::Windows::Forms::Padding(4);
+	this->pictureBox2->Location = System::Drawing::Point(14, 4);
 	this->pictureBox2->Name = L"pictureBox2";
-	this->pictureBox2->Size = System::Drawing::Size(51, 47);
+	this->pictureBox2->Size = System::Drawing::Size(38, 38);
 	this->pictureBox2->SizeMode = System::Windows::Forms::PictureBoxSizeMode::StretchImage;
 	this->pictureBox2->TabIndex = 3;
 	this->pictureBox2->TabStop = false;
@@ -104,10 +116,9 @@ System::Void MainForm::InitializeComponent(void)
 	this->label1->AutoSize = true;
 	this->label1->Font = (gcnew System::Drawing::Font(L"Showcard Gothic", 14.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 		static_cast<System::Byte>(0)));
-	this->label1->Location = System::Drawing::Point(76, 14);
-	this->label1->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+	this->label1->Location = System::Drawing::Point(57, 11);
 	this->label1->Name = L"label1";
-	this->label1->Size = System::Drawing::Size(179, 30);
+	this->label1->Size = System::Drawing::Size(143, 23);
 	this->label1->TabIndex = 2;
 	this->label1->Text = L"MOCKINGBIRD";
 	// 
@@ -119,19 +130,17 @@ System::Void MainForm::InitializeComponent(void)
 	this->flowLayoutPanel1->Controls->Add(this->fileContainer);
 	this->flowLayoutPanel1->Controls->Add(this->filesContainer);
 	this->flowLayoutPanel1->Dock = System::Windows::Forms::DockStyle::Left;
-	this->flowLayoutPanel1->Location = System::Drawing::Point(0, 57);
-	this->flowLayoutPanel1->Margin = System::Windows::Forms::Padding(4);
+	this->flowLayoutPanel1->Location = System::Drawing::Point(0, 46);
 	this->flowLayoutPanel1->Name = L"flowLayoutPanel1";
-	this->flowLayoutPanel1->Size = System::Drawing::Size(251, 539);
+	this->flowLayoutPanel1->Size = System::Drawing::Size(188, 438);
 	this->flowLayoutPanel1->TabIndex = 2;
 	// 
 	// homeContainer
 	// 
 	this->homeContainer->Controls->Add(this->homeButton);
-	this->homeContainer->Location = System::Drawing::Point(4, 4);
-	this->homeContainer->Margin = System::Windows::Forms::Padding(4);
+	this->homeContainer->Location = System::Drawing::Point(3, 3);
 	this->homeContainer->Name = L"homeContainer";
-	this->homeContainer->Size = System::Drawing::Size(247, 89);
+	this->homeContainer->Size = System::Drawing::Size(185, 72);
 	this->homeContainer->TabIndex = 4;
 	// 
 	// homeButton
@@ -145,9 +154,8 @@ System::Void MainForm::InitializeComponent(void)
 	this->homeButton->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"home")));
 	this->homeButton->ImageAlign = System::Drawing::ContentAlignment::MiddleLeft;
 	this->homeButton->Location = System::Drawing::Point(0, 0);
-	this->homeButton->Margin = System::Windows::Forms::Padding(4);
 	this->homeButton->Name = L"homeButton";
-	this->homeButton->Size = System::Drawing::Size(243, 85);
+	this->homeButton->Size = System::Drawing::Size(182, 69);
 	this->homeButton->TabIndex = 3;
 	this->homeButton->Text = L"Home";
 	this->homeButton->UseVisualStyleBackColor = false;
@@ -156,10 +164,9 @@ System::Void MainForm::InitializeComponent(void)
 	// fileContainer
 	// 
 	this->fileContainer->Controls->Add(this->mockOneFile_btn);
-	this->fileContainer->Location = System::Drawing::Point(4, 101);
-	this->fileContainer->Margin = System::Windows::Forms::Padding(4);
+	this->fileContainer->Location = System::Drawing::Point(3, 81);
 	this->fileContainer->Name = L"fileContainer";
-	this->fileContainer->Size = System::Drawing::Size(247, 89);
+	this->fileContainer->Size = System::Drawing::Size(185, 72);
 	this->fileContainer->TabIndex = 5;
 	// 
 	// mockOneFile_btn
@@ -173,10 +180,9 @@ System::Void MainForm::InitializeComponent(void)
 	this->mockOneFile_btn->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"bird")));
 	this->mockOneFile_btn->ImageAlign = System::Drawing::ContentAlignment::MiddleLeft;
 	this->mockOneFile_btn->Location = System::Drawing::Point(0, 0);
-	this->mockOneFile_btn->Margin = System::Windows::Forms::Padding(4);
 	this->mockOneFile_btn->Name = L"mockOneFile_btn";
-	this->mockOneFile_btn->Padding = System::Windows::Forms::Padding(0, 0, 33, 0);
-	this->mockOneFile_btn->Size = System::Drawing::Size(243, 85);
+	this->mockOneFile_btn->Padding = System::Windows::Forms::Padding(0, 0, 25, 0);
+	this->mockOneFile_btn->Size = System::Drawing::Size(182, 69);
 	this->mockOneFile_btn->TabIndex = 3;
 	this->mockOneFile_btn->Text = L"Mock single file";
 	this->mockOneFile_btn->TextAlign = System::Drawing::ContentAlignment::MiddleRight;
@@ -186,10 +192,9 @@ System::Void MainForm::InitializeComponent(void)
 	// filesContainer
 	// 
 	this->filesContainer->Controls->Add(this->mockFiles_btn);
-	this->filesContainer->Location = System::Drawing::Point(4, 198);
-	this->filesContainer->Margin = System::Windows::Forms::Padding(4);
+	this->filesContainer->Location = System::Drawing::Point(3, 159);
 	this->filesContainer->Name = L"filesContainer";
-	this->filesContainer->Size = System::Drawing::Size(247, 89);
+	this->filesContainer->Size = System::Drawing::Size(185, 72);
 	this->filesContainer->TabIndex = 6;
 	// 
 	// mockFiles_btn
@@ -203,10 +208,9 @@ System::Void MainForm::InitializeComponent(void)
 	this->mockFiles_btn->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"bird2")));
 	this->mockFiles_btn->ImageAlign = System::Drawing::ContentAlignment::MiddleLeft;
 	this->mockFiles_btn->Location = System::Drawing::Point(0, 0);
-	this->mockFiles_btn->Margin = System::Windows::Forms::Padding(4);
 	this->mockFiles_btn->Name = L"mockFiles_btn";
-	this->mockFiles_btn->Padding = System::Windows::Forms::Padding(0, 0, 33, 0);
-	this->mockFiles_btn->Size = System::Drawing::Size(243, 85);
+	this->mockFiles_btn->Padding = System::Windows::Forms::Padding(0, 0, 25, 0);
+	this->mockFiles_btn->Size = System::Drawing::Size(182, 69);
 	this->mockFiles_btn->TabIndex = 3;
 	this->mockFiles_btn->Text = L"Mock files with dependencies";
 	this->mockFiles_btn->TextAlign = System::Drawing::ContentAlignment::MiddleRight;
@@ -215,21 +219,21 @@ System::Void MainForm::InitializeComponent(void)
 	// 
 	// MainForm
 	// 
-	this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
+	this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 	this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-	this->ClientSize = System::Drawing::Size(1207, 596);
+	this->ClientSize = System::Drawing::Size(905, 484);
 	this->Controls->Add(this->flowLayoutPanel1);
 	this->Controls->Add(this->pnlSideBar);
 	this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::None;
 	this->Icon = (cli::safe_cast<System::Drawing::Icon^>(resources->GetObject(L"mockingBirdIco")));
 	this->IsMdiContainer = true;
-	this->Margin = System::Windows::Forms::Padding(4);
 	this->Name = L"MainForm";
 	this->SizeGripStyle = System::Windows::Forms::SizeGripStyle::Show;
 	this->StartPosition = System::Windows::Forms::FormStartPosition::CenterScreen;
 	this->Text = L"Mockingbird";
 	this->pnlSideBar->ResumeLayout(false);
 	this->pnlSideBar->PerformLayout();
+	(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->helpImg))->EndInit();
 	(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox2))->EndInit();
 	this->flowLayoutPanel1->ResumeLayout(false);
 	this->homeContainer->ResumeLayout(false);

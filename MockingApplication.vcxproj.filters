@@ -62,6 +62,12 @@
     <ClInclude Include="IncludeModuleSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OverwriteForm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DuplicateFilesForm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CppCLR_WinFormsProject.cpp">
@@ -103,6 +109,12 @@
     <ClCompile Include="MockingSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OverwriteForm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DuplicateFilesForm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico">
@@ -127,6 +139,9 @@
       <Filter>Resource Files\Images</Filter>
     </Image>
     <Image Include="back.png">
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="help.png">
       <Filter>Resource Files\Images</Filter>
     </Image>
   </ItemGroup>

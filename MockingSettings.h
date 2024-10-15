@@ -31,9 +31,8 @@ namespace MockingApplication {
 	private:
 		System::ComponentModel::Container ^components;
 
-#pragma region Windows Form Designer generated code
 		void InitializeComponent(void);
-#pragma endregion
+
 
 	private: 
 		System::Void top_pnl_MouseDown(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e);

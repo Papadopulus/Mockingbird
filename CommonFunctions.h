@@ -6,10 +6,6 @@
 ref class CommonFunctions
 {
 public:
-	// A function that casts String^ to std::string
-	static std::string toStandardString(System::String^ string);
-	// Saves the mocked functions to a new file.
-	static void SaveMockedFile(const std::string& mockedFilePath, const std::string& a_originalFilePath, const std::vector<std::string>& a_mockFunctions);
 	/**
 	 * @brief Retrieves the path of the currently running executable.
 	 *
@@ -19,6 +15,10 @@ public:
 	 * @return A string containing the full path to the executable.
 	 */
 	static std::string GetExecutablePath();
+	// A function that casts String^ to std::string
+	static std::string toStandardString(System::String^ string);
+	// Saves the mocked functions to a new file.
+	static void SaveMockedFile(const std::string& mockedFilePath, const std::string& a_originalFilePath, const std::vector<std::string>& a_mockFunctions);
 
 	// Converts a managed List<System::String^> to a std::vector<std::string>.
 	static std::vector<std::string> ConvertToStdVector(System::Collections::Generic::List<System::String^>^ list);

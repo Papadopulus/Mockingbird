@@ -40,6 +40,8 @@ namespace CppCLRWinFormsProject {
 		System::Windows::Forms::Panel^ filesContainer;
 		System::Windows::Forms::Button^ mockFiles_btn;
 		ReaLTaiizor::Controls::NightControlBox^ nightControlBox1;
+	private: System::Windows::Forms::PictureBox^ helpImg;
+
 
 	private:
 		System::ComponentModel::Container^ components;

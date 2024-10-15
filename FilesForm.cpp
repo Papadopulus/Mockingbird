@@ -1,9 +1,6 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "FilesForm.h"
 #include <windows.h>
-#include <sstream>
-#include <iostream>
-#include <fstream>
 
 using namespace MockingApplication;
 
@@ -96,6 +93,140 @@ System::Void FilesForm::filesForm_Load(System::Object^ sender, System::EventArgs
 	// Disables the ControlBox (minimize, maximize, close) for this form
 	this->ControlBox = false;
 }
+System::Void FilesForm::add_static_btn_Click(System::Object^ sender, System::EventArgs^ e)
+{
+	InsertStaticMacroInFiles(applicationRootPath);
+	ReplaceStaticInFiles(applicationRootPath);
+	ProcessFilesInFolderForStaticElements(applicationRootPath);
+
+	// Disable button after click
+	overlay->add_static_btn->Enabled = false;
+
+	// Change button text
+	overlay->add_static_btn->Text = "Static Added To Files";
+
+}
+void FilesForm::InsertStaticMacroInFiles(String^ folderPath)
+{
+	std::string directory = CommonFunctions::toStandardString(folderPath);
+
+	for (const auto& entry : std::filesystem::directory_iterator(directory)) {
+		if (entry.path().extension() == ".c") {
+			std::ifstream file(entry.path().string());
+			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			file.close();
+
+			// Check if "Local Definitions" exists
+			size_t pos = content.find("Local Definitions\n");
+
+			// If it exists, add the macros below
+			if (pos != std::string::npos) {
+				// Find the end of a commented line and count two lines after that
+				pos = content.find('\n', pos);  // End of line with "Local Definitions"
+				pos = content.find('\n', pos + 1);  // Next line (first)
+
+				// Insert the macros below the second line
+				content.insert(pos + 1, "\n#ifdef UNIT_TESTING\n#define STATIC\n#define STATIC_INLINE\n#else\n#define STATIC static\n#define STATIC_INLINE static inline\n#endif\n");
+			}
+			// If it doesn't exist, add "// Local Definitions" and macros to the end of the file
+			else {
+				content.append("\n// Local Definitions\n#ifdef UNIT_TESTING\n#define STATIC\n#define STATIC_INLINE\n#else\n#define STATIC static\n#define STATIC_INLINE static inline\n#endif\n");
+			}
+
+			// Save the changed content back to the file
+			std::ofstream outFile(entry.path().string());
+			outFile << content;
+			outFile.close();
+		}
+	}
+	// Go back one folder and look for main.c
+	std::filesystem::path parentDirectory = std::filesystem::path(directory).parent_path();
+	std::filesystem::path mainFilePath = parentDirectory / "main.c";
+
+	if (std::filesystem::exists(mainFilePath)) {
+		std::ifstream mainFile(mainFilePath.string());
+		std::string mainContent((std::istreambuf_iterator<char>(mainFile)), std::istreambuf_iterator<char>());
+		mainFile.close();
+
+		// Find the "Local Definitions" comment
+		size_t pos = mainContent.find("Local Definitions\n");
+
+		// If "Local Definitions" comment is found
+		if (pos != std::string::npos) {
+			// Find the end of a commented line and count two lines after that
+			pos = mainContent.find('\n', pos); // End of line with "// Local Definitions"
+			pos = mainContent.find('\n', pos + 1);  // Next line (first)
+
+			// Insert the macros below the second line
+			mainContent.insert(pos + 1, "\n#ifdef UNIT_TESTING\n#define STATIC\n#define STATIC_INLINE\n#else\n#define STATIC static\n#define STATIC_INLINE static inline\n#endif\n");
+		}
+		// If there are no "Local Definitions", add to the end of the file
+		else {
+			mainContent.append("\n//	Local Definitions\n#ifdef UNIT_TESTING\n#define STATIC\n#define STATIC_INLINE\n#else\n#define STATIC static\n#define STATIC_INLINE static inline\n#endif\n");
+		}
+
+		// Write the changed content back to main.c
+		std::ofstream mainOutFile(mainFilePath.string());
+		mainOutFile << mainContent;
+		mainOutFile.close();
+	}
+}
+void FilesForm::ReplaceStaticInFiles(String^ folderPath)
+{
+	std::string directory = CommonFunctions::toStandardString(folderPath);
+
+	for (const auto& entry : std::filesystem::directory_iterator(directory)) {
+		if (entry.path().extension() == ".c") {
+			std::ifstream file(entry.path().string());
+			std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+			file.close();
+
+			std::string modifiedContent;
+			bool insideFunctionBody = false;
+
+			std::istringstream contentStream(content);
+			std::string line;
+
+			// Regex for static inline (except in function body)
+			std::regex staticInlineRegex(R"(\bstatic\s+inline\b)");
+
+			// Regex for static (except in function body)
+			std::regex staticRegex(R"(\bstatic\b)");
+
+			while (std::getline(contentStream, line)) {
+				// If we find an opening parenthesis in the line, we are inside the body of the function
+				if (line.find('{') != std::string::npos) {
+					insideFunctionBody = true;
+				}
+
+				// If we find a closing parenthesis in the line, we exit the function body
+				if (line.find('}') != std::string::npos) {
+					insideFunctionBody = false;
+				}
+
+				// Check if the line contains #define
+				if (line.find("#define") == std::string::npos) {
+					// If the line does not contain a #define and we are not inside the function body
+					if (!insideFunctionBody) {
+						// Change static inline to STATIC_INLINE
+						line = std::regex_replace(line, staticInlineRegex, "STATIC_INLINE");
+
+						// Change static to STATIC (but only if we're not inside the function body)
+						line = std::regex_replace(line, staticRegex, "STATIC");
+					}
+				}
+
+				// Add a line to the modified content
+				modifiedContent += line + "\n";
+			}
+
+			// We write the changed content back to the file
+			std::ofstream outFile(entry.path().string());
+			outFile << modifiedContent;
+			outFile.close();
+		}
+	}
+}
 System::Void FilesForm::mutFolder_btn_Click(System::Object^ sender, System::EventArgs^ e)
 {
 	// Create and open a folder browser dialog
@@ -103,7 +234,6 @@ System::Void FilesForm::mutFolder_btn_Click(System::Object^ sender, System::Even
 	String^ lastMutPath = LoadLastUsedPath("mut");
 	folderDialog->RootFolder = (lastMutPath != nullptr) ? lastMutPath : Directory::GetCurrentDirectory();
 	if (folderDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK) {
-
 
 		// Get the selected folder path
 		String^ selectedPath = folderDialog->SelectedFolder;
@@ -147,10 +277,65 @@ void FilesForm::ProcessFilesInFolder(String^ folderPath)
 	// Display #include directives to the user (for now just print to console)
 	DisplayIncludesToUser();
 }
+void FilesForm::ProcessFilesInFolderForStaticElements(String^ folderPath)
+{
+	// Create a vector to store all file paths
+	std::vector<std::string> staticElements;
+	// Convert managed string to standard string
+	std::string directory = std::filesystem::path(CommonFunctions::toStandardString(folderPath)).string();
+
+	// Iterate through the directory to find .c and .h files
+	for (const auto& entry : std::filesystem::directory_iterator(directory)) {
+		if (entry.path().extension() == ".c") {
+			// Process the .c file and append static elements to the vector
+			std::vector<std::string> fileStaticElements = mockingFiles.ProcessFileStatic(entry.path().string());
+			staticElements.insert(staticElements.end(), fileStaticElements.begin(), fileStaticElements.end());
+		}
+	}
+	// Now, go one directory back and find the main.c file
+	std::filesystem::path mainFilePath = std::filesystem::path(directory).parent_path() / "main.c";
+
+	if (std::filesystem::exists(mainFilePath)) {
+		std::ifstream mainFile(mainFilePath.string());
+		std::string mainContent((std::istreambuf_iterator<char>(mainFile)), std::istreambuf_iterator<char>());
+		mainFile.close();
+
+		// Find the "Local Definitions" comment
+		size_t pos = mainContent.find("Local Definitions\n");
+
+		// Convert static elements vector to a single string
+		std::string staticElementsString;
+		for (const auto& element : staticElements) {
+			staticElementsString += element + "\n";
+		}
+
+		// If "Local Definitions" comment is found
+		if (pos != std::string::npos) {
+			// Find the end of a commented line and count two lines after that
+			pos = mainContent.find('\n', pos);  // End of line with "// Local Definitions"
+			pos = mainContent.find('\n', pos + 1);  // Next line (first)
+			pos = mainContent.find('\n', pos + 1);  // Second line
+
+			// Insert static elements after "Local Variables"
+			mainContent.insert(pos, staticElementsString);
+		}
+		// If there are no "Local Definitions", add to the end of the file
+		else {
+			mainContent.append("\n//	Local Definitions\n" + staticElementsString);
+		}
+
+		// Write the changed content back to main.c
+		std::ofstream mainOutFile(mainFilePath.string());
+		mainOutFile << mainContent;
+		mainOutFile.close();
+	}
+}
 std::vector<std::string> FilesForm::GetIncludesFromFile(const std::string& filePath)
 {
 	// Create a vector to store #include directives
 	std::vector<std::string> includes;
+	// Get the directory of the current file
+	std::string currentDirectory = std::filesystem::path(filePath).parent_path().string();
 	// Open the file for reading
 	std::ifstream file(filePath);
 	if (!file.is_open()) {
@@ -165,7 +350,15 @@ std::vector<std::string> FilesForm::GetIncludesFromFile(const std::string& fileP
 		std::smatch match;
 		// If the line matches the #include regex, add it to the includes vector
 		if (std::regex_search(line, match, includeRegex)) {
-			includes.push_back(match[1].str());
+			std::string includePath = match[1].str();
+
+			// Check if the included file is in the same directory
+			std::filesystem::path fullPath = std::filesystem::path(currentDirectory) / includePath;
+
+			// If the full path of the include file is not in the selected folder, add it to the list
+			if (!std::filesystem::exists(fullPath) || fullPath.parent_path().string() != currentDirectory) {
+				includes.push_back(includePath);
+			}
 		}
 	}
 	return includes;
@@ -186,6 +379,7 @@ void FilesForm::DisplayIncludesToUser()
 		overlay->checkAllUncheckAll_btn->Click += gcnew System::EventHandler(this, &FilesForm::checkAllUncheckAll_btn_Click);
 		overlay->advanced_btn->Click += gcnew System::EventHandler(this, &FilesForm::advanced_btn_Click);
 		overlay->mockingSettings_btn->Click += gcnew System::EventHandler(this, &FilesForm::mockingSettings_btn_Click);
+		overlay->add_static_btn->Click += gcnew System::EventHandler(this, &FilesForm::add_static_btn_Click);
 
 
 		overlay->Dock = System::Windows::Forms::DockStyle::Fill;
@@ -242,7 +436,7 @@ System::Void FilesForm::mockingSettings_btn_Click(System::Object^ sender, System
 {
 	if (srcPath == nullptr)
 	{
-		MessageBox::Show("Please select the src folder that contains the selected file.");
+		MessageBox::Show("Please select the source folder that contains the selected file.");
 		// Create and open a folder browser dialog
 		BetterFolderBrowser^ folderDialog = gcnew BetterFolderBrowser();
 
@@ -254,21 +448,29 @@ System::Void FilesForm::mockingSettings_btn_Click(System::Object^ sender, System
 			SaveLastUsedPath("src", folderDialog->SelectedPath);
 		}
 	}
-	if (mockingSettingsForm == nullptr)
+	if (srcPath)
 	{
-		mockingSettingsForm = gcnew MockingSettings();
-		mockingSettingsForm->FormBorderStyle = System::Windows::Forms::FormBorderStyle::None;
-		mockingSettingsForm->StartPosition = FormStartPosition::CenterParent;
-		mockingSettingsForm->save_btn->Click += gcnew System::EventHandler(this, &FilesForm::save_btn_Click);
-		mockingSettingsForm->apply_btn->Click += gcnew System::EventHandler(this, &FilesForm::apply_Mocking_Settings_btn_Click);
-		mockingSettingsForm->FormClosed += gcnew System::Windows::Forms::FormClosedEventHandler(this, &FilesForm::MockingSettingsForm_FormClosed);
-		mockingSettingsForm->checkedListBox->SelectedIndexChanged += gcnew System::EventHandler(this, &FilesForm::CheckListBox_SelectedIndexChanged);
-		ProcessFileForMockingSettings();
-		mockingSettingsForm->ShowDialog();
+		if (mockingSettingsForm == nullptr)
+		{
+			mockingSettingsForm = gcnew MockingSettings();
+			mockingSettingsForm->FormBorderStyle = System::Windows::Forms::FormBorderStyle::None;
+			mockingSettingsForm->StartPosition = FormStartPosition::CenterParent;
+			mockingSettingsForm->save_btn->Click += gcnew System::EventHandler(this, &FilesForm::save_btn_Click);
+			mockingSettingsForm->apply_btn->Click += gcnew System::EventHandler(this, &FilesForm::apply_Mocking_Settings_btn_Click);
+			mockingSettingsForm->FormClosed += gcnew System::Windows::Forms::FormClosedEventHandler(this, &FilesForm::MockingSettingsForm_FormClosed);
+			mockingSettingsForm->checkedListBox->SelectedIndexChanged += gcnew System::EventHandler(this, &FilesForm::CheckListBox_SelectedIndexChanged);
+			ProcessFileForMockingSettings();
+			mockingSettingsForm->ShowDialog();
+		}
+		else
+		{
+			mockingSettingsForm->Activate();
+		}
 	}
 	else
 	{
-		mockingSettingsForm->Activate();
+		// Handle case where no folder is selected (dialog canceled or closed)
+		MessageBox::Show("No folder selected. Please select a source folder to proceed.");
 	}
 
 }
@@ -278,7 +480,7 @@ System::Void FilesForm::apply_Mocking_Settings_btn_Click(System::Object^ sender,
 	int selectedIndex = mockingSettingsForm->checkedListBox->SelectedIndex;
 
 	if (selectedIndex < 0) {
-		MessageBox::Show("Niste izabrali nijednu funkciju.", "Greska", MessageBoxButtons::OK, MessageBoxIcon::Error);
+		MessageBox::Show("You have not selected any features.", "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
 		return;
 	}
 
@@ -325,7 +527,7 @@ System::Void FilesForm::apply_Mocking_Settings_btn_Click(System::Object^ sender,
 
 	// If either parameter is not set, display a message and stop saving
 	if (!hasPtr || !hasLength) {
-		MessageBox::Show("Morate postaviti 'Ptr' i 'Length' parametre pre nego što primenite promene.", "Greska", MessageBoxButtons::OK, MessageBoxIcon::Error);
+		MessageBox::Show("You must set the 'Ptr' and 'Length' parameters before applying the changes.", "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
 		return;
 	}
 
@@ -357,7 +559,7 @@ System::Void FilesForm::apply_Mocking_Settings_btn_Click(System::Object^ sender,
 	// Add the new function with the new settings
 	currentModule->functions->Add(funcSettings);
 
-	MessageBox::Show("Postavke su uspešno primenjene.", "Uspeh", MessageBoxButtons::OK, MessageBoxIcon::Information);
+	MessageBox::Show("Settings successfully applied.", "Success", MessageBoxButtons::OK, MessageBoxIcon::Information);
 }
 System::Void FilesForm::save_btn_Click(System::Object^ sender, System::EventArgs^ e)
 {
@@ -376,7 +578,7 @@ System::Void FilesForm::save_btn_Click(System::Object^ sender, System::EventArgs
 
 	if (currentModule == nullptr)
 	{
-		MessageBox::Show("Nista niste promenili", "Neuspeh", MessageBoxButtons::OK, MessageBoxIcon::Information);
+		MessageBox::Show("You haven't changed anything", "Failure", MessageBoxButtons::OK, MessageBoxIcon::Information);
 	}
 	// Create a list of functions to keep (those that are checked)
 	std::vector<std::string> checkedFunctions;
@@ -418,7 +620,6 @@ System::Void FilesForm::save_btn_Click(System::Object^ sender, System::EventArgs
 }
 void FilesForm::ProcessFileForMockingSettings()
 {
-
 	try {
 		// Recursively iterate through the directory to find the selected file
 		for (const auto& entry : std::filesystem::recursive_directory_iterator(CommonFunctions::toStandardString(srcPath)))
@@ -498,6 +699,7 @@ void FilesForm::ProcessFileForMockingSettings()
 		String^ errorMessage = gcnew String(e.what());
 		MessageBox::Show("Error: " + errorMessage);
 	}
+
 }
 void FilesForm::CheckListBox_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e)
 {
@@ -627,7 +829,7 @@ void FilesForm::DisplayFunctionsForMockingSettings(std::vector<std::string> func
 	{
 		for each (FunctionSettings ^ funcSettings in currentModule->functions)
 		{
-			savedFunctionsMap[funcSettings->returnType+"\t"+funcSettings->functionName] = funcSettings;
+			savedFunctionsMap[funcSettings->returnType + "\t" + funcSettings->functionName] = funcSettings;
 		}
 	}
 
@@ -726,25 +928,144 @@ System::Void FilesForm::apply_btn_Click(System::Object^ sender, System::EventArg
 }
 System::Void FilesForm::next_btn_Click(System::Object^ sender, System::EventArgs^ e)
 {
-	if (overlay->checkedListBox->CheckedItems->Count == 0)
-	{
-		MessageBox::Show("You must select at least one item before proceeding.");
-		return;
-	}
-	// Create a vector to store the selected files
-	std::vector<std::string> checkedFiles;
+	mockedFilesInfo = gcnew List<MockedFileInfo^>();
 	// Add each checked item from the checked list box to the vector
 	for (int i = 0; i < overlay->checkedListBox->CheckedItems->Count; i++)
 	{
-		std::string item = CommonFunctions::toStandardString(overlay->checkedListBox->CheckedItems[i]->ToString());
-		checkedFiles.push_back(item);
+		MockedFileInfo^ fileInfo = gcnew MockedFileInfo();
+		fileInfo->fileName = overlay->checkedListBox->CheckedItems[i]->ToString();
+		fileInfo->isDuplicate = false;
+		mockedFilesInfo->Add(fileInfo);
 	}
 	// Call the function to select the source folder
 	if (advancedForm != nullptr)
 	{
 		advancedForm->Close();
 	}
-	SelectSrcFolder(checkedFiles);
+
+	// Check for existing mock files
+
+	CheckExistingMockedFiles(mockedFilesInfo);
+
+	// If there are files that have already been mocked
+	if (existingMockedFiles)
+	{
+		ShowOverwriteForm();
+	}
+	else
+	{
+		SelectSrcFolder();
+	}
+}
+void FilesForm::CheckExistingMockedFiles(List<MockedFileInfo^>^ selectedFiles)
+{
+	// Get the parent path of the application root path
+	std::string parentPath = std::filesystem::path(CommonFunctions::toStandardString(applicationRootPath)).parent_path().string();
+
+	// Recursively find all files in the parent folder
+	std::unordered_set<std::string> parentFolderFiles;
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(parentPath))
+	{
+		if (entry.is_directory() && entry.path().filename() == ".svn")
+		{
+			continue; // Skip .svn directories
+		}
+		if (entry.is_regular_file())
+		{
+			std::string fileName = entry.path().filename().string();
+			// Check if the file is in the list of selected files
+			for each (MockedFileInfo ^ fileInfo in selectedFiles)
+			{
+				if (fileInfo->fileName == gcnew String(fileName.c_str()))
+				{
+					fileInfo->isDuplicate = true; // Mark as duplicate
+
+
+					// We calculate the relative path according to parentPath
+					std::filesystem::path relativePath = std::filesystem::relative(entry.path().parent_path(), parentPath);
+					// Get the first folder from the relative path
+					std::string parentFolderName = relativePath.begin()->string();
+					// Check if the new parent folder is `lib'
+					if (parentFolderName == "lib")
+					{
+						fileInfo->parentFolder = gcnew String(parentFolderName.c_str());
+						fileInfo->originalPath = gcnew String(entry.path().parent_path().string().c_str());
+					}
+					// If the current folder is not `lib`, we check if we have already set it to `lib`
+					else if (fileInfo->parentFolder != "lib")
+					{
+						fileInfo->parentFolder = gcnew String(parentFolderName.c_str());
+						fileInfo->originalPath = gcnew String(entry.path().parent_path().string().c_str());
+					}
+					existingMockedFiles = true; // We set the flag to have duplicates
+				}
+			}
+		}
+	}
+
+}
+void FilesForm::ShowOverwriteForm()
+{
+	// Create a form to display files that have already been mocked
+	overwriteForm = gcnew OverwriteForm();
+
+	overwriteForm->StartPosition = FormStartPosition::Manual;
+	overwriteForm->MdiParent = this->MdiParent;
+
+	overwriteForm->overwrite_next_btn->Click += gcnew System::EventHandler(this, &FilesForm::overwrite_next_btn);
+	overwriteForm->Dock = System::Windows::Forms::DockStyle::Fill;
+
+
+	// Display the files in the corresponding CheckedListBoxes based on the parentFolder value
+	for each (MockedFileInfo ^ fileInfo in mockedFilesInfo)
+	{
+		if (fileInfo->isDuplicate)
+		{
+			if (fileInfo->parentFolder == "cfg")
+			{
+				// Add files from cfg folder to cfgCheckedListBox
+				overwriteForm->cfgCheckedListBox->Items->Add(fileInfo->fileName, true);
+			}
+			else if (fileInfo->parentFolder == "lib")
+			{
+				// Add files from lib folder to libCheckedListBox
+				overwriteForm->libCheckedListBox->Items->Add(fileInfo->fileName, true);
+			}
+			else
+			{
+				// All other files go in otherCheckedListBox
+				overwriteForm->otherCheckedListBox->Items->Add(fileInfo->fileName, true);
+			}
+		}
+	}
+
+	// Display the form
+	overwriteForm->Show();
+}
+System::Void FilesForm::overwrite_next_btn(System::Object^ sender, System::EventArgs^ e)
+{
+	// Create a list of files that are not checked (will not be overwritten)
+	List<MockedFileInfo^>^ toRemove = gcnew List<MockedFileInfo^>();
+
+	for each (MockedFileInfo ^ fileInfo in mockedFilesInfo)
+	{
+		// If the file is a duplicate, check if it is checked in the form
+		if (fileInfo->isDuplicate &&
+			(!overwriteForm->cfgCheckedListBox->CheckedItems->Contains(fileInfo->fileName) &&
+				!overwriteForm->libCheckedListBox->CheckedItems->Contains(fileInfo->fileName) &&
+				!overwriteForm->otherCheckedListBox->CheckedItems->Contains(fileInfo->fileName)))
+		{
+			toRemove->Add(fileInfo); // If it's not checked, add it to the removal list
+		}
+	}
+
+	// Remove all unchecked files
+	for each (MockedFileInfo ^ fileInfo in toRemove)
+	{
+		mockedFilesInfo->Remove(fileInfo);
+	}
+	existingMockedFiles = false;
+	SelectSrcFolder();
 }
 System::Void FilesForm::back_btn_Click(System::Object^ sender, System::EventArgs^ e)
 {
@@ -779,11 +1100,11 @@ System::Void FilesForm::checkAllUncheckAll_btn_Click(System::Object^ sender, Sys
 		overlay->checkAllUncheckAll_btn->Text = "Check All";
 	}
 }
-void FilesForm::SelectSrcFolder(std::vector<std::string> selectedFiles)
+void FilesForm::SelectSrcFolder()
 {
 	if (srcPath == nullptr)
 	{
-		MessageBox::Show("Now select the src folder that contains the checked files.");
+		MessageBox::Show("Now select the source folder that contains the checked files.");
 		// Create and open a folder browser dialog
 		BetterFolderBrowser^ folderDialog = gcnew BetterFolderBrowser();
 
@@ -795,41 +1116,50 @@ void FilesForm::SelectSrcFolder(std::vector<std::string> selectedFiles)
 			SaveLastUsedPath("src", folderDialog->SelectedPath);
 		}
 	}
-
-	// Show ProgressForm
-	progressForm = gcnew ProgressForm();
-	progressForm->Show();
-	progressForm->StartPosition = FormStartPosition::Manual;
-	progressForm->MdiParent = this->MdiParent;
-	progressForm->Dock = System::Windows::Forms::DockStyle::Fill;
-	progressForm->metroProgressBar1->Maximum = selectedFiles.size();
-	progressForm->metroProgressBar1->Value = 0;
-	progressForm->status_lbl->Text = "Mocking files...";
-	progressForm->Refresh();
-
-	List<String^>^ managedSelectedFiles = gcnew List<String^>();
-	for (const auto& file : selectedFiles)
+	if (srcPath)
 	{
-		managedSelectedFiles->Add(gcnew String(file.c_str()));
+		overlay->Close();
+		if (overwriteForm != nullptr)
+		{
+			overwriteForm->Close();
+		}
+		// Show ProgressForm
+		progressForm = gcnew ProgressForm();
+		progressForm->Show();
+		progressForm->StartPosition = FormStartPosition::Manual;
+		progressForm->MdiParent = this->MdiParent;
+		progressForm->Dock = System::Windows::Forms::DockStyle::Fill;
+		progressForm->metroProgressBar1->Maximum = mockedFilesInfo->Count;
+		progressForm->metroProgressBar1->Value = 0;
+		progressForm->status_lbl->Text = "Mocking files...";
+		progressForm->Refresh();
+		bgWorker->RunWorkerAsync(srcPath);
 	}
-	FileProcessArgs^ args = gcnew FileProcessArgs(managedSelectedFiles, srcPath);
-	bgWorker->RunWorkerAsync(args);
+	else
+	{
+		// Handle case where no folder is selected (dialog canceled or closed)
+		MessageBox::Show("No folder selected. Please select a source folder to proceed.");
+	}
 }
 void FilesForm::bgWorker_DoWork(Object^ sender, DoWorkEventArgs^ e)
 {
 	BackgroundWorker^ worker = dynamic_cast<BackgroundWorker^>(sender);
-	FileProcessArgs^ args = dynamic_cast<FileProcessArgs^>(e->Argument);
-
-	List<String^>^ selectedFiles = args->selectedFiles;
-	String^ selectedPath = args->selectedPath;
+	String^ srcPath = dynamic_cast<String^>(e->Argument); // Receive srcPath as an argument
+	std::string standardSrcPath = CommonFunctions::toStandardString(srcPath); // Conversion to std::string
 
 	int progress = 0;
-	for each (String ^ file in selectedFiles)
+	for each (MockedFileInfo ^ fileInfo in mockedFilesInfo)
 	{
-		std::string filePath = CommonFunctions::toStandardString(file);
-		std::string path = CommonFunctions::toStandardString(selectedPath);
+		// If duplicate, use original path to overwrite files
+		if (fileInfo->isDuplicate)
+		{
+			ProcessSelectedFileInFolder(fileInfo, standardSrcPath, true); // true means it's a duplicate
+		}
+		else
+		{
+			ProcessSelectedFileInFolder(fileInfo, standardSrcPath, false); // false means it's not a duplicate
+		}
 
-		ProcessSelectedFileInFolder(filePath, path);
 		progress++;
 		worker->ReportProgress(progress);
 	}
@@ -846,20 +1176,69 @@ void FilesForm::bgWorker_RunWorkerCompleted(Object^ sender, RunWorkerCompletedEv
 		overlay->Close();
 	}
 
+	// Loop through the global list of files (mockedFilesInfo)
+	List<FileEntry^>^ duplicateFiles = gcnew List<FileEntry^>();
+	for each (MockedFileInfo ^ fileInfo in mockedFilesInfo)
+	{
+		if (fileInfo->isDuplicate && fileInfo->parentFolder == "lib")
+		{
+			// Find the relative path from the lib folder onwards
+			std::filesystem::path fullPath = CommonFunctions::toStandardString(fileInfo->originalPath);
+			std::filesystem::path relativePath = std::filesystem::relative(fullPath, std::filesystem::path(CommonFunctions::toStandardString(applicationRootPath)).parent_path().string());
+			// Add a FileEntry structure that stores both relative and fullPath
+			duplicateFiles->Add(gcnew FileEntry(
+				gcnew String((relativePath.string() + "\\" + CommonFunctions::toStandardString(fileInfo->fileName)).c_str()),
+				gcnew String((fullPath.string() + "\\" + CommonFunctions::toStandardString(fileInfo->fileName)).c_str())));
+
+		}
+	}
+	// Finish the status of the progress bar
 	progressForm->status_lbl->Text = "Mocking finished.";
-	System::Threading::Thread::Sleep(1000);
 	progressForm->Close();
+
+	if (duplicateFiles->Count > 0)
+	{
+		duplicateForm = gcnew DuplicateFilesForm();
+		duplicateForm->StartPosition = FormStartPosition::Manual;
+		duplicateForm->MdiParent = this->MdiParent;
+		duplicateForm->Dock = System::Windows::Forms::DockStyle::Fill;
+		duplicateForm->listBox1->MouseDoubleClick += gcnew System::Windows::Forms::MouseEventHandler(this, &FilesForm::OnFileDoubleClick);
+		// Add all files to ListBox directly
+		for each (FileEntry ^ fileEntry in duplicateFiles)
+		{
+			duplicateForm->listBox1->Items->Add(fileEntry);
+		}
+
+		// Show the form
+		duplicateForm->Show();
+
+	}
 	srcPath = nullptr;
+
 }
-void FilesForm::ProcessSelectedFileInFolder(const std::string& fileName, const std::string& folderPath)
+void FilesForm::OnFileDoubleClick(Object^ sender, MouseEventArgs^ e)
+{
+	if (duplicateForm->listBox1->SelectedItem != nullptr)
+	{
+		// Get the selected FileEntry
+		FileEntry^ selectedFile = dynamic_cast<FileEntry^>(duplicateForm->listBox1->SelectedItem);
+
+		if (selectedFile != nullptr && System::IO::File::Exists(selectedFile->fullPath))
+		{
+			// Open File Explorer and display the file
+			System::Diagnostics::Process::Start("explorer.exe", "/select,\"" + selectedFile->fullPath + "\"");
+		}
+	}
+}
+void FilesForm::ProcessSelectedFileInFolder(MockedFileInfo^ fileInfo, const std::string& folderPath, bool isDuplicate)
 {
 	try {
 		// Get the parent path of the application root path
 		std::string applicationRootPathStd = std::filesystem::path(CommonFunctions::toStandardString(applicationRootPath)).parent_path().string();
-		// Pronadji include mod koji odgovara fajlu
+		// Find the include mod that matches the file
 		IncludeModuleSettings^ inclSettings = nullptr;
 		for each (IncludeModuleSettings ^ settings in includeSettings) {
-			if (CommonFunctions::toStandardString(settings->includeName) == fileName) {
+			if (settings->includeName == fileInfo->fileName) {
 				inclSettings = settings;
 				break;
 			}
@@ -872,34 +1251,229 @@ void FilesForm::ProcessSelectedFileInFolder(const std::string& fileName, const s
 				continue; // Skip .svn directories
 			}
 			// If the file name matches, process it
-			if (entry.path().filename() == fileName)
+			if (entry.path().filename() == CommonFunctions::toStandardString(fileInfo->fileName))
 			{
 				// Get the original folder and create a new folder path
 				std::string originalFolder = entry.path().parent_path().string();
-				std::string newFolder = applicationRootPathStd + "\\mocks/" + entry.path().parent_path().filename().string();
 
-				// Create new folder if it doesn't exist
-				std::filesystem::create_directories(newFolder);
-
-				// Copy all .h files and mock .c files
-				for (const auto& file : std::filesystem::directory_iterator(originalFolder))
+				if (isDuplicate)
 				{
-					// Copy .h file
-					if (file.path().extension() == ".h")
+					if (fileInfo->parentFolder == "lib")
 					{
-						std::filesystem::copy(file.path(), newFolder + "/" + file.path().filename().string(), std::filesystem::copy_options::overwrite_existing);
+						std::string newFolder = applicationRootPathStd + "\\mocks/" + entry.path().parent_path().filename().string();
+
+						// Create new folder if it doesn't exist
+						std::filesystem::create_directories(newFolder);
+
+						std::unordered_set<std::string> processedHeaderFiles; // A set that tracks already processed .h files
+
+						for (const auto& file : std::filesystem::directory_iterator(originalFolder))
+						{
+							// If the file is .c
+							if (file.path().extension() == ".c")
+							{
+								std::string filePathString = file.path().string();
+
+								// Call the function and get mocked functions and macro definitions
+								auto [mockedFunctions, macroDefinitions] = mockingFiles.ProcessFileWithSeperateDefines(filePathString, inclSettings);
+
+								// Save mocked functions
+								CommonFunctions::SaveMockedFile(newFolder + "/" + file.path().filename().string(), filePathString, mockedFunctions);
+								CommonFunctions::SaveMockedFile(CommonFunctions::toStandardString(fileInfo->originalPath) + "/" + file.path().filename().string(), filePathString, mockedFunctions);
+
+								// Check if there is a matching .h file
+								std::string headerFilePath = originalFolder + "\\" + file.path().stem().string() + ".h"; // Same name of .h and .c file
+								std::string newHeaderFilePath = newFolder + "/" + file.path().stem().string() + ".h"; // Copied .h file
+								std::string originalHeaderFilePath = CommonFunctions::toStandardString(fileInfo->originalPath) + "/" + file.path().stem().string() + ".h"; // Original path for .h
+
+								if (std::filesystem::exists(headerFilePath))
+								{
+									// Copy the .h file to newFolder and originalPath
+									std::filesystem::copy(headerFilePath, newHeaderFilePath, std::filesystem::copy_options::overwrite_existing);
+									std::filesystem::copy(headerFilePath, originalHeaderFilePath, std::filesystem::copy_options::overwrite_existing);
+
+									// Insert the macro definitions into the copied .h file
+									InsertMacrosIntoHeader(newHeaderFilePath, macroDefinitions);
+									InsertMacrosIntoHeader(originalHeaderFilePath, macroDefinitions);
+
+									// Add this file to the set as processed
+									processedHeaderFiles.insert(headerFilePath);
+								}
+							}
+							// If the file is .h
+							else if (file.path().extension() == ".h")
+							{
+								std::string headerFilePath = file.path().string();
+								std::string newHeaderFilePath = newFolder + "/" + file.path().filename().string();
+								std::string originalHeaderFilePath = CommonFunctions::toStandardString(fileInfo->originalPath) + "/" + file.path().filename().string();
+
+								// If this .h file has already been processed from the linked .c file, skip
+								if (processedHeaderFiles.find(headerFilePath) != processedHeaderFiles.end())
+								{
+									continue; // It was already copied in the previous processing of the .c file
+								}
+
+								// Copy the .h file to both folders
+								std::filesystem::copy(file.path(), newHeaderFilePath, std::filesystem::copy_options::overwrite_existing);
+								std::filesystem::copy(file.path(), originalHeaderFilePath, std::filesystem::copy_options::overwrite_existing);
+							}
+						}
+					}
+					else if (fileInfo->parentFolder == "cfg")
+					{
+						std::unordered_set<std::string> processedHeaderFiles; // A set that tracks already processed .h files
+						for (const auto& file : std::filesystem::directory_iterator(originalFolder))
+						{
+							std::string fileName = removeExtension(fileInfo->fileName);
+							std::string currentFileName = file.path().stem().string(); // Filename without extension
+							if (currentFileName == fileName && file.path().extension() == ".c")
+							{
+								std::string filePathString = file.path().string();
+
+								// Call the function and get mocked functions and macro definitions
+								auto [mockedFunctions, macroDefinitions] = mockingFiles.ProcessFileWithSeperateDefines(filePathString, inclSettings);
+								CommonFunctions::SaveMockedFile(CommonFunctions::toStandardString(fileInfo->originalPath) + "/" + file.path().filename().string(), filePathString, mockedFunctions);
+
+								// Check if there is a matching .h file
+								std::string headerFilePath = originalFolder + "\\" + file.path().stem().string() + ".h";
+								std::string originalHeaderFilePath = CommonFunctions::toStandardString(fileInfo->originalPath) + "/" + file.path().stem().string() + ".h"; // Original path for .h
+
+								if (std::filesystem::exists(headerFilePath))
+								{
+									// Copy the .h file to newFolder and originalPath
+									std::filesystem::copy(headerFilePath, originalHeaderFilePath, std::filesystem::copy_options::overwrite_existing);
+									InsertMacrosIntoHeader(headerFilePath, macroDefinitions);
+									// Add this file to the set as processed
+									processedHeaderFiles.insert(headerFilePath);
+								}
+							}// If the file is .h
+							else if (file.path().extension() == ".h")
+							{
+								std::string fileName = removeExtension(fileInfo->fileName);
+								std::string currentFileName = file.path().stem().string(); // filename without extension
+
+								if (currentFileName == fileName && file.path().extension() == ".h")
+								{
+									std::string headerFilePath = file.path().string();
+									std::string originalHeaderFilePath = CommonFunctions::toStandardString(fileInfo->originalPath) + "/" + file.path().filename().string();
+
+									// If this .h file has already been processed from the linked .c file, skip
+									if (processedHeaderFiles.find(headerFilePath) != processedHeaderFiles.end())
+									{
+										continue; // It was already copied in the previous processing of the .c file
+									}
+
+									// Copy the .h file to both folders
+									std::filesystem::copy(file.path(), originalHeaderFilePath, std::filesystem::copy_options::overwrite_existing);
+								}
+							}
+						}
 
 					}
-					// Mock .c file
-					if (file.path().extension() == ".c")
+					else
 					{
-						std::string filePathString = file.path().string();
-						std::vector<std::string> mockedFunctions = mockingFiles.ProcessFile(filePathString, inclSettings);
-						CommonFunctions::SaveMockedFile(newFolder + "/" + file.path().filename().string(), filePathString, mockedFunctions);
+						std::string newFolder = applicationRootPathStd + "\\mocks/" + entry.path().parent_path().filename().string();
 
+						// Create new folder if it doesn't exist
+						std::filesystem::create_directories(newFolder);
+
+						std::unordered_set<std::string> processedHeaderFiles; // A set that tracks already processed .h files
+						for (const auto& file : std::filesystem::directory_iterator(originalFolder))
+						{
+							// Mock .c file
+							if (file.path().extension() == ".c")
+							{
+
+								std::string filePathString = file.path().string();
+
+								// Call the function and get mocked functions and macro definitions
+								auto [mockedFunctions, macroDefinitions] = mockingFiles.ProcessFileWithSeperateDefines(filePathString, inclSettings);
+								CommonFunctions::SaveMockedFile(newFolder + "/" + file.path().filename().string(), filePathString, mockedFunctions);
+
+								// Check if there is a matching .h file
+								std::string headerFilePath = originalFolder + "\\" + file.path().stem().string() + ".h"; // Same name of .h and .c file
+								std::string newHeaderFilePath = newFolder + "/" + file.path().stem().string() + ".h"; // Copied .h file
+								if (std::filesystem::exists(headerFilePath))
+								{
+									// Copy the .h file to newFolder and originalPath
+									std::filesystem::copy(headerFilePath, newHeaderFilePath, std::filesystem::copy_options::overwrite_existing);
+
+									InsertMacrosIntoHeader(newHeaderFilePath, macroDefinitions);
+
+									// Add this file to the set as processed
+									processedHeaderFiles.insert(headerFilePath);
+								}
+
+							}// If the file is .h
+							else if (file.path().extension() == ".h")
+							{
+								std::string headerFilePath = file.path().string();
+								std::string newHeaderFilePath = newFolder + "/" + file.path().filename().string();
+
+								// If this .h file has already been processed from the linked .c file, skip
+								if (processedHeaderFiles.find(headerFilePath) != processedHeaderFiles.end())
+								{
+									continue; // It was already copied in the previous processing of the .c file
+								}
+
+								// Copy the .h file to both folders
+								std::filesystem::copy(file.path(), newHeaderFilePath, std::filesystem::copy_options::overwrite_existing);
+							}
+						}
+					}
+
+				}
+				else
+				{
+					std::string newFolder = applicationRootPathStd + "\\mocks/" + entry.path().parent_path().filename().string();
+
+					// Create new folder if it doesn't exist
+					std::filesystem::create_directories(newFolder);
+
+					std::unordered_set<std::string> processedHeaderFiles; // A set that tracks already processed .h files
+					for (const auto& file : std::filesystem::directory_iterator(originalFolder))
+					{
+						// Mock .c file
+						if (file.path().extension() == ".c")
+						{
+
+							std::string filePathString = file.path().string();
+
+							// Call the function and get mocked functions and macro definitions
+							auto [mockedFunctions, macroDefinitions] = mockingFiles.ProcessFileWithSeperateDefines(filePathString, inclSettings);
+							CommonFunctions::SaveMockedFile(newFolder + "/" + file.path().filename().string(), filePathString, mockedFunctions);
+
+							// Check if there is a matching .h file
+							std::string headerFilePath = originalFolder + "\\" + file.path().stem().string() + ".h"; // Same name of .h and .c file
+							std::string newHeaderFilePath = newFolder + "/" + file.path().stem().string() + ".h"; // Copied .h file
+							if (std::filesystem::exists(headerFilePath))
+							{
+								// Copy the .h file to newFolder and originalPath
+								std::filesystem::copy(headerFilePath, newHeaderFilePath, std::filesystem::copy_options::overwrite_existing);
+
+								InsertMacrosIntoHeader(newHeaderFilePath, macroDefinitions);
+
+								// Add this file to the set as processed
+								processedHeaderFiles.insert(headerFilePath);
+							}
+
+						}// If the file is .h
+						else if (file.path().extension() == ".h")
+						{
+							std::string headerFilePath = file.path().string();
+							std::string newHeaderFilePath = newFolder + "/" + file.path().filename().string();
+
+							// If this .h file has already been processed from the linked .c file, skip
+							if (processedHeaderFiles.find(headerFilePath) != processedHeaderFiles.end())
+							{
+								continue; // It was already copied in the previous processing of the .c file
+							}
+
+							// Copy the .h file to both folders
+							std::filesystem::copy(file.path(), newHeaderFilePath, std::filesystem::copy_options::overwrite_existing);
+						}
 					}
 				}
-
 
 			}
 		}
@@ -1047,3 +1621,77 @@ System::Void FilesForm::checkedListBox_SelectedIndexChanged(System::Object^ send
 {
 	overlay->mockingSettings_btn->Enabled = overlay->checkedListBox->SelectedIndex != -1;
 }
+std::string FilesForm::removeExtension(String^ fileNameWithExtension) {
+	// Find the position of the last point
+	int dotIndex = fileNameWithExtension->LastIndexOf('.');
+
+	// If there is a dot, return the part of the string up to the dot
+	if (dotIndex > 0) {
+		return CommonFunctions::toStandardString(fileNameWithExtension->Substring(0, dotIndex));
+	}
+
+	// If there is no dot, return the entire string
+	return CommonFunctions::toStandardString(fileNameWithExtension);
+}
+void FilesForm::InsertMacrosIntoHeader(const std::string& headerFilePath, const std::vector<std::string>& macroDefinitions) {
+	std::ifstream headerFile(headerFilePath);
+	std::string line;
+	std::vector<std::string> fileLines;
+	std::string globalDefinitionsMarker = "Global Definitions";
+	bool globalDefinitionsFound = false;
+	bool skipNextLine = false;  // Flag for skipping the dashed line
+
+	// Load the lines of the file and store them in a vector
+	while (std::getline(headerFile, line)) {
+		fileLines.push_back(line);
+
+		// Find the marker for "Global Definitions"
+		if (line.find(globalDefinitionsMarker) != std::string::npos) {
+			globalDefinitionsFound = true;
+			skipNextLine = true;  // Prepare to skip next line (dashed line)
+		}
+		else if (skipNextLine) {
+			skipNextLine = false;  // Stop skipping lines
+		}
+	}
+	headerFile.close();
+
+	std::ofstream headerFileOut(headerFilePath); // Open the file for writing
+	bool macrosInserted = false; // Check if macros are already inserted
+
+	if (headerFileOut.is_open()) {
+		for (size_t i = 0; i < fileLines.size(); ++i) {
+			headerFileOut << fileLines[i] << std::endl;  // Write all lines back to file
+
+			// If we found a marker, insert the macros below it
+			if (globalDefinitionsFound && fileLines[i].find(globalDefinitionsMarker) != std::string::npos && !macrosInserted) {
+				// If there is a next line, insert it (dashed line)
+				if (i + 1 < fileLines.size()) {
+					headerFileOut << fileLines[i + 1] << std::endl;  // We write the dashed line
+					++i;  // Skip the dotted line
+				}
+
+				// Insert macros
+				for (const auto& macro : macroDefinitions) {
+					headerFileOut << macro << std::endl;
+				}
+				macrosInserted = true;  // We mark that the macros are inserted
+			}
+		}
+
+		// If the marker is not found, add the macros to the end of the file
+		if (!macrosInserted) {
+			headerFileOut << std::endl;
+			headerFileOut << "// --------------------------------------------------------------------------------------------------------------------" << std::endl;
+			headerFileOut << "//\tGlobal Definitions" << std::endl;
+			headerFileOut << "// --------------------------------------------------------------------------------------------------------------------" << std::endl;
+
+			for (const auto& macro : macroDefinitions) {
+				headerFileOut << macro << std::endl;
+			}
+		}
+
+		headerFileOut.close();
+	}
+}
+

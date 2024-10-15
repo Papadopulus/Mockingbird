@@ -1,1 +1,15 @@
-﻿  MockingApplication.vcxproj -> C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Release\MockingApplication.exe
+﻿  DuplicateFilesForm.cpp
+  FilesForm.cpp
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(20,108): warning C4677: 'ProcessFile': signature of non-private member contains assembly private type 'IncludeModuleSettings'
+  (compiling source file 'FilesForm.cpp')
+      C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
+      see declaration of 'IncludeModuleSettings'
+  
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(21,164): warning C4677: 'ProcessFileWithSeperateDefines': signature of non-private member contains assembly private type 'IncludeModuleSettings'
+  (compiling source file 'FilesForm.cpp')
+      C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
+      see declaration of 'IncludeModuleSettings'
+  
+  Generating Code...
+  AdvancedSettingsForm.obj : MSIL module encountered; incremental linking is disabled for MSIL; performing full link
+  MockingApplication.vcxproj -> C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Release\MockingApplication.exe

@@ -15,12 +15,14 @@ C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Debug\BetterFolderBrowser.x
 C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Debug\ReaLTaiizor.xml
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.vcxproj.AssemblyReference.cache
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.AdvancedSettingsForm.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.DuplicateFilesForm.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.FileForm.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.FilesForm.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.MainForm.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.Home.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.MockingSettings.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.OverlayCheckBoxForm.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.OverwriteForm.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.ProgressForm.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.Resources.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Debug\MockingApplication.vcxproj.GenerateResource.cache

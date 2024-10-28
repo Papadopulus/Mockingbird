@@ -25,7 +25,6 @@ System::Void MainForm::InitializeComponent(void)
 {
 	System::Resources::ResourceManager^ resources = (gcnew System::Resources::ResourceManager(L"MockingApplication.Resources", System::Reflection::Assembly::GetExecutingAssembly()));
 	this->pnlSideBar = (gcnew System::Windows::Forms::Panel());
-	this->helpImg = (gcnew System::Windows::Forms::PictureBox());
 	this->nightControlBox1 = (gcnew ReaLTaiizor::Controls::NightControlBox());
 	this->pictureBox2 = (gcnew System::Windows::Forms::PictureBox());
 	this->label1 = (gcnew System::Windows::Forms::Label());
@@ -36,13 +35,15 @@ System::Void MainForm::InitializeComponent(void)
 	this->mockOneFile_btn = (gcnew System::Windows::Forms::Button());
 	this->filesContainer = (gcnew System::Windows::Forms::Panel());
 	this->mockFiles_btn = (gcnew System::Windows::Forms::Button());
+	this->panel1 = (gcnew System::Windows::Forms::Panel());
+	this->how_to_use_btn = (gcnew System::Windows::Forms::Button());
 	this->pnlSideBar->SuspendLayout();
-	(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->helpImg))->BeginInit();
 	(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox2))->BeginInit();
 	this->flowLayoutPanel1->SuspendLayout();
 	this->homeContainer->SuspendLayout();
 	this->fileContainer->SuspendLayout();
 	this->filesContainer->SuspendLayout();
+	this->panel1->SuspendLayout();
 	this->SuspendLayout();
 	// 
 	// pnlSideBar
@@ -51,23 +52,12 @@ System::Void MainForm::InitializeComponent(void)
 	this->pnlSideBar->Controls->Add(this->nightControlBox1);
 	this->pnlSideBar->Controls->Add(this->pictureBox2);
 	this->pnlSideBar->Controls->Add(this->label1);
-	this->pnlSideBar->Controls->Add(this->helpImg);
 	this->pnlSideBar->Dock = System::Windows::Forms::DockStyle::Top;
 	this->pnlSideBar->Location = System::Drawing::Point(0, 0);
 	this->pnlSideBar->Name = L"pnlSideBar";
 	this->pnlSideBar->Size = System::Drawing::Size(905, 46);
 	this->pnlSideBar->TabIndex = 1;
 	this->pnlSideBar->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &MainForm::pnlSideBar_MouseDown);
-	// 
-	// helpImg
-	// 
-	this->helpImg->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"help")));
-	this->helpImg->Location = System::Drawing::Point(706, -4);
-	this->helpImg->Name = L"helpImg";
-	this->helpImg->Size = System::Drawing::Size(53, 53);
-	this->helpImg->SizeMode = System::Windows::Forms::PictureBoxSizeMode::StretchImage;
-	this->helpImg->TabIndex = 5;
-	this->helpImg->TabStop = false;
 	// 
 	// nightControlBox1
 	// 
@@ -129,6 +119,7 @@ System::Void MainForm::InitializeComponent(void)
 	this->flowLayoutPanel1->Controls->Add(this->homeContainer);
 	this->flowLayoutPanel1->Controls->Add(this->fileContainer);
 	this->flowLayoutPanel1->Controls->Add(this->filesContainer);
+	this->flowLayoutPanel1->Controls->Add(this->panel1);
 	this->flowLayoutPanel1->Dock = System::Windows::Forms::DockStyle::Left;
 	this->flowLayoutPanel1->Location = System::Drawing::Point(0, 46);
 	this->flowLayoutPanel1->Name = L"flowLayoutPanel1";
@@ -181,7 +172,7 @@ System::Void MainForm::InitializeComponent(void)
 	this->mockOneFile_btn->ImageAlign = System::Drawing::ContentAlignment::MiddleLeft;
 	this->mockOneFile_btn->Location = System::Drawing::Point(0, 0);
 	this->mockOneFile_btn->Name = L"mockOneFile_btn";
-	this->mockOneFile_btn->Padding = System::Windows::Forms::Padding(0, 0, 25, 0);
+	this->mockOneFile_btn->Padding = System::Windows::Forms::Padding(0, 0, 20, 0);
 	this->mockOneFile_btn->Size = System::Drawing::Size(182, 69);
 	this->mockOneFile_btn->TabIndex = 3;
 	this->mockOneFile_btn->Text = L"Mock single file";
@@ -217,6 +208,34 @@ System::Void MainForm::InitializeComponent(void)
 	this->mockFiles_btn->UseVisualStyleBackColor = false;
 	this->mockFiles_btn->Click += gcnew System::EventHandler(this, &MainForm::mockFiles_btn_Click);
 	// 
+	// panel1
+	// 
+	this->panel1->Controls->Add(this->how_to_use_btn);
+	this->panel1->Location = System::Drawing::Point(3, 237);
+	this->panel1->Name = L"panel1";
+	this->panel1->Size = System::Drawing::Size(185, 72);
+	this->panel1->TabIndex = 7;
+	// 
+	// how_to_use_btn
+	// 
+	this->how_to_use_btn->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(23)), static_cast<System::Int32>(static_cast<System::Byte>(24)),
+		static_cast<System::Int32>(static_cast<System::Byte>(29)));
+	this->how_to_use_btn->Cursor = System::Windows::Forms::Cursors::Default;
+	this->how_to_use_btn->Font = (gcnew System::Drawing::Font(L"Segoe UI", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+		static_cast<System::Byte>(238)));
+	this->how_to_use_btn->ForeColor = System::Drawing::Color::White;
+	this->how_to_use_btn->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"HowToUse")));
+	this->how_to_use_btn->ImageAlign = System::Drawing::ContentAlignment::MiddleLeft;
+	this->how_to_use_btn->Location = System::Drawing::Point(0, 0);
+	this->how_to_use_btn->Name = L"how_to_use_btn";
+	this->how_to_use_btn->Padding = System::Windows::Forms::Padding(0, 0, 40, 0);
+	this->how_to_use_btn->Size = System::Drawing::Size(182, 69);
+	this->how_to_use_btn->TabIndex = 3;
+	this->how_to_use_btn->Text = L"How to use";
+	this->how_to_use_btn->TextAlign = System::Drawing::ContentAlignment::MiddleRight;
+	this->how_to_use_btn->UseVisualStyleBackColor = false;
+	this->how_to_use_btn->Click += gcnew System::EventHandler(this, &MainForm::how_to_use_btn_Click);
+	// 
 	// MainForm
 	// 
 	this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -231,14 +250,15 @@ System::Void MainForm::InitializeComponent(void)
 	this->SizeGripStyle = System::Windows::Forms::SizeGripStyle::Show;
 	this->StartPosition = System::Windows::Forms::FormStartPosition::CenterScreen;
 	this->Text = L"Mockingbird";
+	this->FormClosed += gcnew System::Windows::Forms::FormClosedEventHandler(this, &MainForm::MainForm_FormClosed);
 	this->pnlSideBar->ResumeLayout(false);
 	this->pnlSideBar->PerformLayout();
-	(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->helpImg))->EndInit();
 	(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox2))->EndInit();
 	this->flowLayoutPanel1->ResumeLayout(false);
 	this->homeContainer->ResumeLayout(false);
 	this->fileContainer->ResumeLayout(false);
 	this->filesContainer->ResumeLayout(false);
+	this->panel1->ResumeLayout(false);
 	this->ResumeLayout(false);
 
 }
@@ -304,5 +324,33 @@ System::Void MainForm::pnlSideBar_MouseDown(System::Object^ sender, System::Wind
 	if (e->Button == System::Windows::Forms::MouseButtons::Left) {
 		ReleaseCapture();
 		SendMessage(this->Handle,WM_NCLBUTTONDOWN, HTCAPTION, IntPtr(0));
+	}
+}
+
+System::Void CppCLRWinFormsProject::MainForm::how_to_use_btn_Click(System::Object^ sender, System::EventArgs^ e)
+{
+	howToForm = gcnew MockingApplication::HowToUseForm();
+	// Set the start position and parent for the overlay form
+	howToForm->MdiParent = this;
+	howToForm->FormClosed += gcnew System::Windows::Forms::FormClosedEventHandler(this, &MainForm::HowToForm_FormClosed);
+	howToForm->Dock = System::Windows::Forms::DockStyle::Fill;
+	howToForm->Show();
+}
+System::Void MainForm::HowToForm_FormClosed(System::Object^ sender, System::Windows::Forms::FormClosedEventArgs^ e)
+{
+	howToForm = nullptr;
+}
+System::Void MainForm::MainForm_FormClosed(System::Object^ sender, System::Windows::Forms::FormClosedEventArgs^ e)
+{
+	if (!String::IsNullOrEmpty(howToForm->tempVideoPath) && File::Exists(howToForm->tempVideoPath))
+	{
+		try
+		{
+			File::Delete(howToForm->tempVideoPath);
+		}
+		catch (Exception^ ex)
+		{
+			Console::WriteLine("Failed to delete temp video file: " + ex->Message);
+		}
 	}
 }

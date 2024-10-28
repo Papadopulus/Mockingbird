@@ -4,6 +4,7 @@
 #include "Home.h"
 #include "FileForm.h"
 #include "FilesForm.h"
+#include "HowToUseForm.h"
 
 namespace CppCLRWinFormsProject {
 
@@ -15,6 +16,7 @@ namespace CppCLRWinFormsProject {
 	using namespace System::Data;
 	using namespace System::Drawing;
 	using namespace System::Runtime::InteropServices;
+	using namespace System::IO;
 
 	public ref class MainForm : public System::Windows::Forms::Form
 	{
@@ -27,6 +29,7 @@ namespace CppCLRWinFormsProject {
 		MockingApplication::Home^ homeForm;
 		MockingApplication::FileForm^ fileForm;
 		MockingApplication::FilesForm^ filesForm;
+		MockingApplication::HowToUseForm^ howToForm;
 
 	private: 
 		System::Windows::Forms::Panel^ pnlSideBar;
@@ -40,7 +43,9 @@ namespace CppCLRWinFormsProject {
 		System::Windows::Forms::Panel^ filesContainer;
 		System::Windows::Forms::Button^ mockFiles_btn;
 		ReaLTaiizor::Controls::NightControlBox^ nightControlBox1;
-	private: System::Windows::Forms::PictureBox^ helpImg;
+	private: System::Windows::Forms::Panel^ panel1;
+	private: System::Windows::Forms::Button^ how_to_use_btn;
+
 
 
 	private:
@@ -55,6 +60,9 @@ namespace CppCLRWinFormsProject {
 		System::Void mockFiles_btn_Click(System::Object^ sender, System::EventArgs^ e);
 		void FilesForm_FormClosed(System::Object^ sender, System::Windows::Forms::FormClosedEventArgs^ e);
 		System::Void pnlSideBar_MouseDown(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e);
+		System::Void HowToForm_FormClosed(System::Object^ sender, System::Windows::Forms::FormClosedEventArgs^ e);
+		System::Void how_to_use_btn_Click(System::Object^ sender, System::EventArgs^ e);
+		System::Void MainForm_FormClosed(System::Object^ sender, System::Windows::Forms::FormClosedEventArgs^ e);
 
 		[DllImport("user32.dll")]
 			static bool ReleaseCapture();
@@ -62,5 +70,6 @@ namespace CppCLRWinFormsProject {
 			static IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 		const int WM_NCLBUTTONDOWN = 0xA1;
 		const IntPtr HTCAPTION = IntPtr(0x2);
+	
 	};
 }

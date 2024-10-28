@@ -27,3 +27,8 @@ C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\M
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.MockingSettings.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.OverwriteForm.resources
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.DuplicateFilesForm.resources
+C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Release\Interop.WMPLib.1.0.dll
+C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Release\AxInterop.WMPLib.1.0.dll
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.vcxproj.ResolveComReference.cache
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.GuideStepForm.resources
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingA.e68680b7\x64\Release\MockingApplication.HowToUseForm.resources

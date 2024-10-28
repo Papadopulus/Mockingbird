@@ -1,15 +1,74 @@
-﻿  DuplicateFilesForm.cpp
+﻿  COM Reference 'WMPLib.1.0' is the interop assembly for ActiveX control 'AxWMPLib.1.0' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.
+  pch.cpp
+  AdvancedSettingsForm.cpp
+  AssemblyInfo.cpp
+  CommonFunctions.cpp
+  CppCLR_WinFormsProject.cpp
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(29,108): warning C4677: 'ProcessFile': signature of non-private member contains assembly private type 'IncludeModuleSettings'
+  (compiling source file 'CppCLR_WinFormsProject.cpp')
+      C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
+      see declaration of 'IncludeModuleSettings'
+  
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(38,164): warning C4677: 'ProcessFileWithSeperateDefines': signature of non-private member contains assembly private type 'IncludeModuleSettings'
+  (compiling source file 'CppCLR_WinFormsProject.cpp')
+      C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
+      see declaration of 'IncludeModuleSettings'
+  
+  DuplicateFilesForm.cpp
+  FileForm.cpp
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(29,108): warning C4677: 'ProcessFile': signature of non-private member contains assembly private type 'IncludeModuleSettings'
+  (compiling source file 'FileForm.cpp')
+      C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
+      see declaration of 'IncludeModuleSettings'
+  
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(38,164): warning C4677: 'ProcessFileWithSeperateDefines': signature of non-private member contains assembly private type 'IncludeModuleSettings'
+  (compiling source file 'FileForm.cpp')
+      C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
+      see declaration of 'IncludeModuleSettings'
+  
   FilesForm.cpp
-C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(20,108): warning C4677: 'ProcessFile': signature of non-private member contains assembly private type 'IncludeModuleSettings'
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(29,108): warning C4677: 'ProcessFile': signature of non-private member contains assembly private type 'IncludeModuleSettings'
   (compiling source file 'FilesForm.cpp')
       C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
       see declaration of 'IncludeModuleSettings'
   
-C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(21,164): warning C4677: 'ProcessFileWithSeperateDefines': signature of non-private member contains assembly private type 'IncludeModuleSettings'
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(38,164): warning C4677: 'ProcessFileWithSeperateDefines': signature of non-private member contains assembly private type 'IncludeModuleSettings'
   (compiling source file 'FilesForm.cpp')
       C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
       see declaration of 'IncludeModuleSettings'
   
+  GuideStepForm.cpp
+  HowToUseForm.cpp
+  MainForm.cpp
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(29,108): warning C4677: 'ProcessFile': signature of non-private member contains assembly private type 'IncludeModuleSettings'
+  (compiling source file 'MainForm.cpp')
+      C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
+      see declaration of 'IncludeModuleSettings'
+  
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(38,164): warning C4677: 'ProcessFileWithSeperateDefines': signature of non-private member contains assembly private type 'IncludeModuleSettings'
+  (compiling source file 'MainForm.cpp')
+      C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
+      see declaration of 'IncludeModuleSettings'
+  
+  Home.cpp
+  MockingFiles.cpp
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(29,108): warning C4677: 'ProcessFile': signature of non-private member contains assembly private type 'IncludeModuleSettings'
+  (compiling source file 'MockingFiles.cpp')
+      C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
+      see declaration of 'IncludeModuleSettings'
+  
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(38,164): warning C4677: 'ProcessFileWithSeperateDefines': signature of non-private member contains assembly private type 'IncludeModuleSettings'
+  (compiling source file 'MockingFiles.cpp')
+      C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
+      see declaration of 'IncludeModuleSettings'
+  
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.cpp(386,17): warning C4129: '(': unrecognized character escape sequence
+C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.cpp(386,17): warning C4129: ';': unrecognized character escape sequence
+  MockingSettings.cpp
+  OverlayCheckBoxForm.cpp
+  OverwriteForm.cpp
+  ProgressForm.cpp
+  .NETFramework,Version=v4.8.AssemblyAttributes.cpp
   Generating Code...
   AdvancedSettingsForm.obj : MSIL module encountered; incremental linking is disabled for MSIL; performing full link
   MockingApplication.vcxproj -> C:\Users\BogdanPetkovic\Source\Repos\Mockingbird\x64\Release\MockingApplication.exe

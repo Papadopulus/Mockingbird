@@ -1,4 +1,5 @@
-﻿  CppCLR_WinFormsProject.cpp
+﻿  COM Reference 'WMPLib.1.0' is the interop assembly for ActiveX control 'AxWMPLib.1.0' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.
+  CppCLR_WinFormsProject.cpp
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(29,108): warning C4677: 'ProcessFile': signature of non-private member contains assembly private type 'IncludeModuleSettings'
   (compiling source file 'CppCLR_WinFormsProject.cpp')
       C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
@@ -9,18 +10,8 @@ C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(38,164): warning
       C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
       see declaration of 'IncludeModuleSettings'
   
-  DuplicateFilesForm.cpp
-  FilesForm.cpp
-C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(29,108): warning C4677: 'ProcessFile': signature of non-private member contains assembly private type 'IncludeModuleSettings'
-  (compiling source file 'FilesForm.cpp')
-      C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
-      see declaration of 'IncludeModuleSettings'
-  
-C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(38,164): warning C4677: 'ProcessFileWithSeperateDefines': signature of non-private member contains assembly private type 'IncludeModuleSettings'
-  (compiling source file 'FilesForm.cpp')
-      C:\Users\BogdanPetkovic\source\repos\Mockingbird\IncludeModuleSettings.h(17,11):
-      see declaration of 'IncludeModuleSettings'
-  
+  GuideStepForm.cpp
+  HowToUseForm.cpp
   MainForm.cpp
 C:\Users\BogdanPetkovic\source\repos\Mockingbird\MockingFiles.h(29,108): warning C4677: 'ProcessFile': signature of non-private member contains assembly private type 'IncludeModuleSettings'
   (compiling source file 'MainForm.cpp')

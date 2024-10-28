@@ -147,6 +147,12 @@
     <ClInclude Include="FilesForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="GuideStepForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="HowToUseForm.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
     <ClInclude Include="IncludeModuleSettings.h" />
     <ClInclude Include="MainForm.h">
       <FileType>CppForm</FileType>
@@ -178,6 +184,8 @@
     <ClCompile Include="DuplicateFilesForm.cpp" />
     <ClCompile Include="FileForm.cpp" />
     <ClCompile Include="FilesForm.cpp" />
+    <ClCompile Include="GuideStepForm.cpp" />
+    <ClCompile Include="HowToUseForm.cpp" />
     <ClCompile Include="MainForm.cpp" />
     <ClCompile Include="Home.cpp" />
     <ClCompile Include="MockingFiles.cpp" />
@@ -205,6 +213,7 @@
     <Image Include="home.png">
       <DeploymentContent>false</DeploymentContent>
     </Image>
+    <Image Include="HowToUse.png" />
     <Image Include="mockingBirdFull.png" />
     <Image Include="mockingBirdIco.ico" />
     <Image Include="mockingBirdRounded.png">
@@ -238,6 +247,12 @@
     <EmbeddedResource Include="FilesForm.resx">
       <DependentUpon>FilesForm.h</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GuideStepForm.resx">
+      <DependentUpon>GuideStepForm.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HowToUseForm.resx">
+      <DependentUpon>HowToUseForm.h</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.h</DependentUpon>
     </EmbeddedResource>
@@ -256,10 +271,43 @@
     <EmbeddedResource Include="ProgressForm.resx">
       <DependentUpon>ProgressForm.h</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources.resx" />
+    <EmbeddedResource Include="Resources.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="WMPLib.1.0">
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>6bf52a50-394a-11d3-b153-00c04f79faa6</Guid>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="AxWMPLib.1.0">
+      <WrapperTool>aximp</WrapperTool>
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>6bf52a50-394a-11d3-b153-00c04f79faa6</Guid>
+      <Lcid>0</Lcid>
+      <Isolated>false</Isolated>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="HowToUseVideo.mp4" />
+    <Media Include="step1.mp4" />
+    <Media Include="step2.mp4" />
+    <Media Include="step3.mp4" />
+    <Media Include="step4.mp4" />
+    <Media Include="step5.mp4" />
+    <Media Include="step6.mp4" />
+    <Media Include="step7.mp4" />
+    <Media Include="step8.mp4" />
+    <Media Include="step9.mp4" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

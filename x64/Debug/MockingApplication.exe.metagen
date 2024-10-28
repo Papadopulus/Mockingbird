@@ -2,6 +2,8 @@
   MockingApplication.DuplicateFilesForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.FileForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.FilesForm.resources - Embedded, ContainedInManifestFile, 
+  MockingApplication.GuideStepForm.resources - Embedded, ContainedInManifestFile, 
+  MockingApplication.HowToUseForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.MainForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.Home.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.MockingSettings.resources - Embedded, ContainedInManifestFile, 
@@ -29,6 +31,10 @@ Assembly System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f
 Assembly System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
 	hash=None, flags=None
 Assembly System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly Interop.WMPLib.1.0, Version=1.0.*, Culture=Invariant Language (Invariant Country): 
+	hash=None, flags=None
+Assembly AxInterop.WMPLib.1.0, Version=1.0.*, Culture=Invariant Language (Invariant Country): 
 	hash=None, flags=None
 Assembly System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
 	hash=None, flags=None
@@ -110,6 +116,15 @@ Class MockingApplication.FilesForm: AutoLayout, AnsiClass, Class, Public, Before
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
   Fields:
     System.ComponentModel.BackgroundWorker bgWorker : Public
+Class MockingApplication.GuideStepForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :System.Windows.Forms.Form
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+Class MockingApplication.HowToUseForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :System.Windows.Forms.Form
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    System.Windows.Forms.Button start_guide_btn : Public
+    System.String tempVideoPath : Public, Static
 Class CppCLRWinFormsProject.MainForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName

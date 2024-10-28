@@ -2,6 +2,8 @@
   MockingApplication.DuplicateFilesForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.FileForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.FilesForm.resources - Embedded, ContainedInManifestFile, 
+  MockingApplication.GuideStepForm.resources - Embedded, ContainedInManifestFile, 
+  MockingApplication.HowToUseForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.MainForm.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.Home.resources - Embedded, ContainedInManifestFile, 
   MockingApplication.MockingSettings.resources - Embedded, ContainedInManifestFile, 
@@ -30,6 +32,10 @@ Assembly System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=
 	hash=None, flags=None
 Assembly System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
 	hash=None, flags=None
+Assembly Interop.WMPLib.1.0, Version=1.0.*, Culture=Invariant Language (Invariant Country): 
+	hash=None, flags=None
+Assembly AxInterop.WMPLib.1.0, Version=1.0.*, Culture=Invariant Language (Invariant Country): 
+	hash=None, flags=None
 Assembly System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
 	hash=None, flags=None
 Class MockingApplication.AdvancedSettingsForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
@@ -45,6 +51,7 @@ Class MockingApplication.Home: AutoLayout, AnsiClass, Class, Public, BeforeField
 Class MockingFiles: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
   Methods:
+    ProcessFileStatic(vector<std::basic_string<char\,std::char_traits<char>\,std::allocator<char> >\,std::allocator<std::basic_string<char\,std::char_traits<char>\,std::allocator<char> > > >*, basic_string<char\,std::char_traits<char>\,std::allocator<char> >* IsImplicitlyDereferenced): PrivateScope, Public, HideBySig
     ProcessFile(vector<std::basic_string<char\,std::char_traits<char>\,std::allocator<char> >\,std::allocator<std::basic_string<char\,std::char_traits<char>\,std::allocator<char> > > >*, basic_string<char\,std::char_traits<char>\,std::allocator<char> >* IsImplicitlyDereferenced, IncludeModuleSettings): PrivateScope, Public, HideBySig
     ProcessFileWithSeperateDefines(pair<std::vector<std::basic_string<char\,std::char_traits<char>\,std::allocator<char> >\,std::allocator<std::basic_string<char\,std::char_traits<char>\,std::allocator<char> > > >\,std::vector<std::basic_string<char\,std::char_traits<char>\,std::allocator<char> >\,std::allocator<std::basic_string<char\,std::char_traits<char>\,std::allocator<char> > > > >*, basic_string<char\,std::char_traits<char>\,std::allocator<char> >* IsImplicitlyDereferenced, IncludeModuleSettings): PrivateScope, Public, HideBySig
     ParseTagsFile(vector<std::basic_string<char\,std::char_traits<char>\,std::allocator<char> >\,std::allocator<std::basic_string<char\,std::char_traits<char>\,std::allocator<char> > > >*, basic_string<char\,std::char_traits<char>\,std::allocator<char> >* IsImplicitlyDereferenced): PrivateScope, Public, HideBySig
@@ -62,6 +69,7 @@ Class MockingApplication.OverlayCheckBoxForm: AutoLayout, AnsiClass, Class, Publ
     System.Windows.Forms.Button initial_btn : Public
     System.Windows.Forms.Button checkAllUncheckAll_btn : Public
     System.Windows.Forms.Button mockingSettings_btn : Public
+    System.Windows.Forms.Button add_static_btn : Public
 Class MockingApplication.ProgressForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
@@ -84,6 +92,11 @@ Class MockingApplication.OverwriteForm: AutoLayout, AnsiClass, Class, Public, Be
     System.Windows.Forms.Button overwrite_next_btn : Public
     System.Windows.Forms.CheckedListBox libCheckedListBox : Public
     System.Windows.Forms.CheckedListBox otherCheckedListBox : Public
+Class MockingApplication.DuplicateFilesForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :System.Windows.Forms.Form
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    System.Windows.Forms.ListBox listBox1 : Public
 Class MockingApplication.MockedFileInfo: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
   Fields:
@@ -91,16 +104,27 @@ Class MockingApplication.MockedFileInfo: AutoLayout, AnsiClass, Class, Public, B
     Boolean isDuplicate : Public
     System.String originalPath : Public
     System.String parentFolder : Public
+Class MockingApplication.FileEntry: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(System.String, System.String): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    System.String relativePath : Public
+    System.String fullPath : Public
+  Methods:
+    ToString(): PrivateScope, Public, Virtual, HideBySig
 Class MockingApplication.FilesForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
   Fields:
     System.ComponentModel.BackgroundWorker bgWorker : Public
-Class CppCLRWinFormsProject.MainForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+Class MockingApplication.GuideStepForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
-Class MockingApplication.DuplicateFilesForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+Class MockingApplication.HowToUseForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
     Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
   Fields:
-    System.Windows.Forms.ListBox listBox1 : Public
+    System.Windows.Forms.Button start_guide_btn : Public
+    System.String tempVideoPath : Public, Static
+Class CppCLRWinFormsProject.MainForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :System.Windows.Forms.Form
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName

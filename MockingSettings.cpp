@@ -16,6 +16,7 @@ MockingSettings::~MockingSettings()
 }
 void MockingSettings::InitializeComponent(void)
 {
+	System::ComponentModel::ComponentResourceManager^ resources = (gcnew System::ComponentModel::ComponentResourceManager(MockingSettings::typeid));
 	this->checkedListBox = (gcnew System::Windows::Forms::CheckedListBox());
 	this->top_pnl = (gcnew System::Windows::Forms::Panel());
 	this->title_lbl = (gcnew System::Windows::Forms::Label());
@@ -107,6 +108,7 @@ void MockingSettings::InitializeComponent(void)
 	this->Controls->Add(this->top_pnl);
 	this->Controls->Add(this->checkedListBox);
 	this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::None;
+	this->Icon = (cli::safe_cast<System::Drawing::Icon^>(resources->GetObject(L"$this.Icon")));
 	this->Name = L"MockingSettings";
 	this->Text = L"MockingSettings";
 	this->top_pnl->ResumeLayout(false);

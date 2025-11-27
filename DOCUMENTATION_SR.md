@@ -119,7 +119,7 @@ my_mock_function(42);  // Test prolazi
 my_mock_function(10);  // Test pada!
 ```
 
-#### 2. `mock()` / `mock_type_ptr(type)`
+#### 2. `mock()` / `mock_ptr_type(type)`
 Vraća unapred definisanu vrednost iz mock funkcije.
 
 ```c
@@ -349,7 +349,7 @@ std::vector<std::string> MockingFiles::MockNonStaticFunctions(
    if (returnType != "void") {
        if (returnType.find('*') != std::string::npos) {
            // Pointer povratni tip
-           mockFunction << "\treturn mock_type_ptr(" << returnType << ");\n";
+           mockFunction << "\treturn mock_ptr_type(" << returnType << ");\n";
        } else {
            mockFunction << "\treturn (" << returnType << ")mock();\n";
        }
